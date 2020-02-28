@@ -28,7 +28,7 @@ use File::Path;
 
 $event = "nethserver-blacklist-update";
 event_templates($event,
-    "/etc/cron.d/nethserver-blacklists"
+    "/etc/cron.d/nethserver-blacklist"
 );
 
 event_actions($event, 'initialize-default-databases' => '00');
@@ -40,7 +40,7 @@ event_actions($event, 'initialize-default-databases' => '00');
 
 $event = "nethserver-blacklist-save";
 event_templates($event,
-    "/etc/cron.d/nethserver-blacklists"
+    "/etc/cron.d/nethserver-blacklist"
 );
 
 event_actions($event, qw(
