@@ -1,0 +1,112 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+BLDIR=/usr/share/nethserver-blacklist/ipsets
+STATUS=$(/sbin/e-smith/config getprop blacklist status)
+LISTS=$(/sbin/e-smith/config getprop blacklist Categories | tr , ' ')
+RELOAD=0
+DEBUG=0
+
+function exit_error {
+    >&2 echo "[ERROR] $@"
+    exit 1
+}
+
+function debug {
+    if [ $DEBUG -eq 1 ]; then
+        echo "[DEBUG] $@"
+    fi
+}
+
+function warning {
+    >&2 echo "[WARNING] $@"
+}
+
+options=$(getopt -o ld --long reload --long debug  -- "$@")
+[ $? -eq 0 ] || {
+    exit_error "Incorrect options provided"
+}
+eval set -- "$options"
+while true; do
+    case "$1" in
+    --reload|-l)
+        RELOAD=1
+        ;;
+    --debug|-d)
+        DEBUG=1
+        ;;
+    --)
+        shift
+        break
+        ;;
+    esac
+    shift
+done
+
+
+# Cleanup all blacklist ipset
+for j in $(/sbin/ipset -L -name | grep '^bl-')
+do
+    action='destroy'
+    quiet="-quiet"
+    if [ $RELOAD -eq 1 ]; then
+        action='flush'
+    fi
+    if [ $DEBUG -eq 1 ]; then
+        quiet=""
+    fi
+    debug "Resetting ipset $j"
+    /sbin/ipset $quiet $action $j
+done
+
+if [ "$STATUS" == "disabled" ]; then
+    debug "Black list disabled, exit after clean"
+    exit 0
+fi
+
+for l in $LISTS; do
+    file=''
+    type=''
+    file_netset="$BLDIR/$l".netset
+    file_ipset="$BLDIR/$l".ipset
+    name="bl-$l"
+    if [ -f $file_netset ]; then
+        file=$file_netset
+        type="hash:net"
+    elif [ -f $file_ipset ]; then
+        file=$file_ipset
+        type="hash:ip"
+    else
+        warning "Skipping invalid blacklist '$l'"
+        continue
+    fi
+    debug "Creating ipset $name"
+    # Create ipset and load IPs
+    /sbin/ipset create -exist $name $type
+    if [ $? -gt 0 ]; then
+        warning "Can't create $name ipset"
+    fi
+    cat $file | sed '/^#/d' | sed "s/^/add $name /" | /sbin/ipset restore
+    if [ $? -gt 0 ]; then
+        warning "Can't load $name ipset"
+    fi
+done

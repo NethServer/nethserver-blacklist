@@ -1,0 +1,114 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+URL=$(/sbin/e-smith/config getprop blacklist Url)
+SYSTEM_ID=$(/sbin/e-smith/config getprop subscription SystemId)
+SYSTEM_SECRET=$(/sbin/e-smith/config getprop subscription Secret)
+DEST_DIR=/usr/share/nethserver-blacklist/ipsets
+DEBUG=0
+
+function exit_error {
+    >&2 echo "[ERROR] $@"
+    exit 1
+}
+
+function debug {
+    if [ $DEBUG -eq 1 ]; then
+        echo "[DEBUG] $@"
+    fi
+}
+
+
+options=$(getopt -o d --long debug -- "$@")
+[ $? -eq 0 ] || { 
+    >&2 echo "Incorrect options provided"
+    exit 1
+}
+eval set -- "$options"
+while true; do
+    case "$1" in
+    --debug|-d)
+        DEBUG=1
+        ;;
+    --)
+        shift
+        break
+        ;;
+    esac
+    shift
+done
+
+
+if [ -z "$URL" ]; then
+    exit_error "Blacklist URL is not set"
+fi
+
+# Prepare work directory
+mkdir -p $DEST_DIR
+
+# Inject authentication into URL
+proto="$(echo $URL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+url="$(echo ${URL/$proto/})"
+auth=""
+if [[ ! -z "$SYSTEM_SECRET" && ! -z "$SYSTEM_ID" ]]; then
+    auth="$SYSTEM_ID:$SYSTEM_SECRET@"
+fi
+
+# Set git output
+quiet=""
+if [ $DEBUG -eq  0 ]; then
+    quiet=" --quiet "
+fi
+
+# Create repository clone
+if [ ! -d "$DEST_DIR/.git" ]; then
+    debug "Cloning repository"
+    git clone $quiet $proto$auth$url $DEST_DIR
+    if [ $? -gt 0 ]; then
+        exit_error "Can't download blacklist repository"
+    fi
+
+    # do not leak secret 
+    chmod 600 "$DEST_DIR/.git/config"
+else
+    # Pull changes
+    opts="--git-dir=$DEST_DIR/.git --work-tree=$DEST_DIR"
+    debug "Pulling changes"
+
+    git_output=$(git $opts pull -f origin master 2>/dev/null)
+    if [ $? -gt 0 ]; then
+        exit_error "Can't update blacklist repository"
+    fi
+
+    # Reload ipset if repository has been changed
+    echo $git_output | grep -q 'Already up to date'
+    if [ $? -gt 0 ]; then
+        debug_flag=""
+        if [ $DEBUG -eq 1 ]; then
+            debug_flag="-d"
+        fi
+        debug "Repository have been updated: reloading ipset"
+        exec /usr/share/nethserver-blacklist/load-ipsets --reload $debug_flag
+    else
+        debug "Repository already up to date"
+    fi
+fi

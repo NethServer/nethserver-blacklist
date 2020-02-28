@@ -1,0 +1,8 @@
+{
+    my $status = $blacklist{'status'} || 'disabled';
+    if ($status eq 'enabled') {
+        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download'
+    } else {
+        $OUT .= "# Blacklists are disabled"
+    }
+}

@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+#
+# Check if the given IP is inside download categories or live ipset.
+#
+
+use NetAddr::IP;
+use File::Basename;
+use Getopt::Std;
+
+my $SOURCE_DIR = "/usr/share/blacklists/ipsets";
+my $live = 0;
+my $ip = $ARGV[0];
+
+sub exit_error {
+    my $msg = shift;
+    print STDERR $msg."\n";
+    exit 1;
+}
+
+sub within {
+    my $needle = shift;
+    my $haystack = shift;
+
+    $haystack = NetAddr::IP->new($haystack);
+    # early exit if this is not a valid IP
+    return 0 if (!$haystack);
+
+    return $needle->within($haystack);
+}
+
+if (!defined($ARGV[0]) || !$ARGV[0]) {
+    exit_error("Usage: check-ip [-l] [-s] <ip>\n  -l (live) search the ip inside loaded ipset\n  -s (static) search the ip inside downloaded sets, default");
+}
+
+# Set static or live search
+my %options=();
+getopts("ls", \%options);
+
+if (defined($options{'l'})) {
+    $live = 1;
+}
+if (defined($options{'s'})) {
+    $live = 0;
+}
+
+my $ip = NetAddr::IP->new($ARGV[0]);
+if (!$ip) {
+    exit_error("Invalid IP argument");
+}
+
+my $category = "";
+
+if ($live) {
+    # search IP inside loaded ipset
+    my @sets = ();
+
+    # list blacklist sets
+    open(PIPE, "ipset -L -name|");
+    while (<PIPE>) {
+        chomp;
+        if ($_ =~ /^bl\-/) {
+            push(@sets, $_);
+        }
+    }
+    close(PIPE);
+
+    # search inside ipset content
+    foreach my $set (@sets) {
+        last if $category;
+        open(PIPE, "ipset -L $set|");
+        while (<PIPE>) {
+            chomp;
+            if (within($ip,$_)) {
+                $category = $set;
+                last;
+            }
+        }
+        close(PIPE);
+    }
+} else {
+    # search IP inside downloaded categories
+    foreach my $f (glob("$SOURCE_DIR/*{.ipset,.netset}")) {
+        last if $category;
+        open(my $fh, '<:encoding(UTF-8)', $f) or next;
+        while (my $row = <$fh>) {
+            # skip comments
+            next if ($row =~ /^#/);
+            # skip empty rows
+            chomp $row;
+
+            if (within($ip,$row)) {
+                my ($name,$path,$suffix) = fileparse($f,('.ipset', '.netset'));
+                $category = $name;
+                last;
+            }
+        }
+    }
+}
+
+if ($category) {
+    print "$category\n";
+    exit 0;
+} 
+
+exit 1;

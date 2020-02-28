@@ -1,0 +1,52 @@
+{
+    use esmith::NetworksDB;
+    use NethServer::Firewall;
+    my $status = $blacklist{'status'} || 'disabled';
+    if ($status eq 'enabled') {
+        my $fw = new NethServer::Firewall();
+        my $ndb = esmith::NetworksDB->open_ro();
+
+        foreach (split(/,/, $blacklist{'WhiteList'})) {
+            my $host = $fw->getAddress($_);
+            $OUT .= "WHITELIST\t".$fw->getZone($host)."\tloc\n";
+            $OUT .= "WHITELIST\tloc\t".$fw->getZone($host)."\n";
+
+            # firewall
+            $OUT .= "WHITELIST\t".$fw->getZone($host)."\t\$FW\n";
+            $OUT .= "WHITELIST\t\$FW\t".$fw->getZone($host)."\n";
+
+            if ($ndb->blue) {
+                $OUT .= "WHITELIST\t".$fw->getZone($host)."\tblue\n";
+                $OUT .= "WHITELIST\tblue\t".$fw->getZone($host)."\n";
+            }
+            if ($ndb->orange) {
+                $OUT .= "WHITELIST\t".$fw->getZone($host)."\torang\n";
+                $OUT .= "WHITELIST\torang\t".$fw->getZone($host)."\n";
+            }
+        }
+
+
+        my @lists = split(/,/, $blacklist{'Categories'});
+        # remove extension part, add 'bl-' prefix
+        @lists = map { "bl-$_"  } @lists;
+
+        foreach my $name (@lists) {
+            # green interface
+            $OUT .= "BLACKLIST\tnet:+$name\tloc\n";
+            $OUT .= "BLACKLIST\tloc\tnet:+$name\n";
+
+            # firewall
+            $OUT .= "BLACKLIST\tnet:+$name\t\$FW\n";
+            $OUT .= "BLACKLIST\t\$FW\tnet:+$name\n";
+
+            if ($ndb->blue) {
+                $OUT .= "BLACKLIST\tnet:+$name\tblue\n";
+                $OUT .= "BLACKLIST\tblue\tnet:+$name\n";
+            }
+            if ($ndb->orange) {
+                $OUT .= "BLACKLIST\tnet:+$name\torang\n";
+                $OUT .= "BLACKLIST\torang\tnet:+$name\n";
+            }
+        }
+    }
+}

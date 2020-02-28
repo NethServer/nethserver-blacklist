@@ -1,0 +1,2 @@
+system("/usr/share/nethserver-blacklist/load-ipsets");
+1;
