@@ -6,7 +6,7 @@
         my $fw = new NethServer::Firewall();
         my $ndb = esmith::NetworksDB->open_ro();
 
-        foreach (split(/,/, $blacklist{'WhiteList'})) {
+        foreach (split(/,/, $blacklist{'Whitelist'})) {
             my $host = $fw->getAddress($_);
             $OUT .= "WHITELIST\t".$fw->getZone($host)."\tloc\n";
             $OUT .= "WHITELIST\tloc\t".$fw->getZone($host)."\n";
