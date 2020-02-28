@@ -28,7 +28,7 @@ use NetAddr::IP;
 use File::Basename;
 use Getopt::Std;
 
-my $SOURCE_DIR = "/usr/share/blacklists/ipsets";
+my $SOURCE_DIR = "/usr/share/nethserver-blacklist/ipsets";
 my $live = 0;
 my $ip = $ARGV[0];
 

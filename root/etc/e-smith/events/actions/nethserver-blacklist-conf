@@ -25,6 +25,6 @@
 #
 
 status=$(/sbin/e-smith/config getprop blacklist status)
-if [[ "$status" == "enabled" && ! -d /usr/share/blacklists/ipsets ]]; then
-    exec /usr/share/blacklists/download
+if [[ "$status" == "enabled" && ! -d /usr/share/nethserver-blacklist/ipsets ]]; then
+    exec /usr/share/nethserver-blacklist/download
 fi

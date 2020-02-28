@@ -8,10 +8,19 @@ Configuration
 Properties of ``blacklist`` key inside ``configuration`` database:
 
 * ``status``: can be ``enabled`` or ``disabled``, if ``enabled`` selected ``BlackListCategories`` will be blocked using ipsets
-* ``Categories``: a comma-separeted list of blacklist categories, a valid category must have a corresponding file inside ``/usr/share/blacklists/ipsets``.
-  Example: given the category ``test``, a file named ``/usr/share/blacklists/ipsets/test.netset`` or ``/usr/share/blacklists/ipsets/test.ipset`` must exists
+* ``Categories``: a comma-separeted list of blacklist categories, a valid category must have a corresponding file inside ``/usr/share/nethserver-blacklist/ipsets``.
+  Example: given the category ``test``, a file named ``/usr/share/nethserver-blacklist/ipsets/test.netset`` or ``/usr/share/nethserver-blacklist/ipsets/test.ipset`` must exists
 * ``Url``: the GIT URL from where blacklists will be downloaded
 * ``Whitelist``: a comma-separated list of hosts excluded from the blacklists. The host can be an IP, a CIDR, an host object or a CIDR object
+
+Example: ::
+
+ blacklist=configuration
+    Categories=category1
+    Url=https://my.nethserver.org/git/myrepo
+    Whitelist=
+    status=disabled
+
 
 Blacklists
 ==========
