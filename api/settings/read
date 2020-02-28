@@ -1,0 +1,125 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import subprocess
+import simplejson
+import os
+import re
+from datetime import datetime
+
+
+def get_config():
+    bash_command = "/sbin/e-smith/config getjson blacklist"
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    return simplejson.loads(output)
+
+
+def get_confidence(category_id):
+    confidence_7_categories = ['firehol_level1']
+    confidence_6_categories = ['firehol_level2']
+
+    if category_id in confidence_7_categories:
+        return 7
+    elif category_id in confidence_6_categories:
+        return 6
+    else:
+        return 4
+
+
+def get_categories():
+    path = "/usr/share/nethserver-blacklist/ipsets"
+    categories = []
+
+    for file_name in os.listdir(path):
+        if file_name.endswith(".ipset") or file_name.endswith(".netset"):
+            full_path = path + "/" + file_name
+            category = {}
+
+            with open(full_path) as f:
+                lines = f.readlines()
+
+                for line in lines:
+                    # parse only the header
+                    if not re.match(r"^#", line):
+                        break
+
+                    # skip empty lines
+                    if re.match(r"^\s*$", line):
+                        continue
+
+                    maintainer = re.search(r"Maintainer\s+:\s+(\w+)", line)
+                    if maintainer:
+                        category['maintainer'] = maintainer.group(1)
+
+                    category_type = re.search(r"Category\s+:\s+(\w+)", line)
+                    if category_type:
+                        category['type'] = category_type.group(1)
+
+                    confidence = re.search(r"Confidence\s+:\s+(\w+)", line)
+                    if confidence:
+                        category['confidence'] = confidence.group(1)
+
+            f.closed
+            category_id = re.search(r"(.+)\..+", file_name).group(1)
+            category['id'] = category_id
+            name = category_id.replace("_", " ").capitalize()
+            category['name'] = name
+            confidence = get_confidence(category_id)
+            category['confidence'] = confidence
+            categories.append(category)
+
+    return categories
+
+
+def is_firewall_ui_installed():
+    bash_command = "/usr/bin/rpm -q nethserver-firewall-base-ui"
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    return process.returncode == 0
+
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    action = input_json["action"]
+
+    if action == 'configuration':
+        config = get_config()
+        output = simplejson.dumps({'configuration': config})
+        print (output)
+    elif action == 'categories':
+        categories = get_categories()
+        output = simplejson.dumps({'categories': categories})
+        print (output)
+    elif action == 'firewall-ui-installed':
+        fw_installed = is_firewall_ui_installed()
+        output = simplejson.dumps({'firewallUiInstalled': fw_installed})
+        print (output)
+    else:
+        raise ValueError(
+            "action must be one of 'configuration', 'categories' or 'firewall-ui-installed'")
+except Exception, e:
+    print simplejson.dumps({'error': "%s" % e})
+    sys.exit(1)

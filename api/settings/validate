@@ -1,0 +1,139 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import simplejson
+import re
+import os
+
+
+def invalid_attribute(parameter, error):
+    return {"parameter": parameter, "error": error, "value": ""}
+
+
+def get_category_ids():
+    path = "/usr/share/nethserver-blacklist/ipsets"
+    category_ids = []
+
+    for file_name in os.listdir(path):
+        if file_name.endswith(".ipset") or file_name.endswith(".netset"):
+            category_id = re.search(r"(.+)\..+", file_name).group(1)
+            category_ids.append(category_id)
+
+    return category_ids
+
+
+line = fileinput.input()[0].rstrip()
+input_json = simplejson.loads(line)
+invalid_attributes = []
+
+status_p = 'status'
+url_p = 'Url'
+whitelist_p = 'Whitelist'
+categories_p = 'Categories'
+
+status = ''
+url = ''
+whitelist = ''
+categories = ''
+
+# status
+
+if (status_p not in input_json) or (not input_json[status_p]):
+    invalid_attributes.append(invalid_attribute(status_p, "empty"))
+else:
+    status = input_json[status_p]
+
+    if status not in ['enabled', 'disabled']:
+        invalid_attributes.append(invalid_attribute(status_p, "invalid"))
+
+# perform all other validations only if status == 'enabled'
+if status == 'enabled':
+    # url
+    if (url_p not in input_json) or (not input_json[url_p]):
+        invalid_attributes.append(invalid_attribute(url_p, "empty"))
+    else:
+        url = input_json[url_p]
+
+        if not re.match(r"(?:http\:|https\:)?\/\/.+\..+", url):
+            invalid_attributes.append(invalid_attribute(url_p, "invalid"))
+
+    # whitelist
+    if whitelist_p not in input_json:
+        invalid_attributes.append(invalid_attribute(whitelist_p, "empty"))
+    else:
+        whitelist = input_json[whitelist_p]
+
+        if not type(whitelist) is list:
+            invalid_attributes.append(
+                invalid_attribute(whitelist_p, "invalid_type"))
+
+        # check syntax
+        for item in whitelist:
+            if not (item.startswith("host;") or item.startswith("cidr;")):
+                # check IP address
+                if not re.match(r"^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$", item):
+                    invalid_attributes.append(
+                        invalid_attribute(whitelist_p, "invalid"))
+
+        # check duplicates
+        if len(whitelist) != len(set(whitelist)):
+            invalid_attributes.append(
+                invalid_attribute(whitelist_p, "duplicates"))
+
+    # categories
+    if categories_p not in input_json:
+        invalid_attributes.append(invalid_attribute(categories_p, "empty"))
+    else:
+        categories = input_json[categories_p]
+
+        if not type(categories) is list:
+            invalid_attributes.append(
+                invalid_attribute(categories_p, "invalid_type"))
+
+        all_category_ids = get_category_ids()
+
+        for category in categories:
+            if category not in all_category_ids:
+                invalid_attributes.append(
+                    invalid_attribute(categories_p, "invalid"))
+
+        # check duplicates
+        if len(categories) != len(set(categories)):
+            invalid_attributes.append(
+                invalid_attribute(categories_p, "duplicates"))
+
+# output
+success = len(invalid_attributes) == 0
+
+if success:
+    output = {"state": "success"}
+else:
+    output = {"type": "NotValid", "message": "validation_failed",
+              "attributes": invalid_attributes}
+
+output_json = simplejson.dumps(output)
+print(output_json)
+
+if not success:
+    sys.exit(1)

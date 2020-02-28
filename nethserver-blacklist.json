@@ -1,0 +1,23 @@
+{
+    "id": "nethserver-blacklist",
+    "name": "Blacklist",
+    "summary": "Nethserver blacklist",
+    "description": "Nethserver blacklist",
+    "url": "",
+    "homepage": "https://github.com/NethServer/nethserver-blacklist",
+    "provides": ["nethserver-blacklist"],
+    "release": {
+        "version": "_RELEASE_"
+    },
+    "tags": ["blacklist", "ipsets", "nethserver"],
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/NethServer/dev/issues"
+    },
+    "author": {
+        "name": "Andrea Leardini",
+        "url": "https://github.com/NethServer/nethserver-blacklist",
+        "email": "andrea.leardini@nethesis.it"
+    },
+    "icon": "logo.png"
+}
