@@ -85,7 +85,10 @@ fi
 
 debug "Creating global whitelist"
 /sbin/ipset create -exist bl-whitelist hash:net
-cat $BLDIR/whitelist.global | sed '/^#/d; /^$/d' | sed "s/^/add bl-whitelist /" | /sbin/ipset restore
+if [ -f $BLDIR/whitelist.global ]; then
+    debug "Loading global whitelist"
+    cat $BLDIR/whitelist.global | sed '/^#/d; /^$/d' | sed "s/^/add bl-whitelist /" | /sbin/ipset restore
+fi
 
 for l in $LISTS; do
     file=''
