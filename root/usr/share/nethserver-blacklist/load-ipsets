@@ -101,7 +101,7 @@ for l in $LISTS; do
     fi
     debug "Creating ipset $name"
     # Create ipset and load IPs
-    /sbin/ipset create -exist $name $type
+    /sbin/ipset create -exist $name $type maxelem 131072
     if [ $? -gt 0 ]; then
         warning "Can't create $name ipset"
     fi
