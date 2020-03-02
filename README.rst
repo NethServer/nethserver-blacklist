@@ -36,7 +36,7 @@ Blacklist implementation is based on ipset:
 GIT repository
 --------------
 
-The remote GIT repository must contain one or more files with ``.netset`` or ``.ipset`` using `Firehol iplists format <http://iplists.firehol.org/>`_,
+The remote GIT repository may contain one or more files with ``.netset`` or ``.ipset`` using `Firehol iplists format <http://iplists.firehol.org/>`_,
 each file represent a category.
 
 In addition to Firhol file format, the files can contain a ``Confidence`` tag inside the header. Example: ::
@@ -49,6 +49,9 @@ In addition to Firhol file format, the files can contain a ``Confidence`` tag in
 
 The confidence is a number between ``0`` and ``10``, an higher number means less false positives.
 Lists with a confidence greater than 8, should be safe for production.
+
+The repository can also contain a special file named ``whitelist.global`` which is a special netset that
+can be used to quickly remove false positive from a blacklist.
 
 Setup a blacklist server
 ------------------------

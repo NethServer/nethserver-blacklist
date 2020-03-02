@@ -6,6 +6,24 @@
         my $fw = new NethServer::Firewall();
         my $ndb = esmith::NetworksDB->open_ro();
 
+        # Enable global whitelist
+        my $wl = "net:+bl-whitelist";
+        $OUT .= "WHITELIST\t$wl\tloc\n";
+        $OUT .= "WHITELIST\tloc\t$wl\n";
+
+        $OUT .= "WHITELIST\t$wl\t\$FW\n";
+        $OUT .= "WHITELIST\t\$FW\t$wl\n";
+
+        if ($ndb->blue) {
+            $OUT .= "WHITELIST\t$wl\tblue\n";
+            $OUT .= "WHITELIST\tblue\t$wl\n";
+        }
+        if ($ndb->orange) {
+            $OUT .= "WHITELIST\t$wl\torang\n";
+            $OUT .= "WHITELIST\torang\t$wl\n";
+        }
+
+        # Enable local whitelist
         foreach (split(/,/, $blacklist{'Whitelist'})) {
             my $host = $fw->getAddress($_);
             $OUT .= "WHITELIST\t".$fw->getZone($host)."\tloc\n";
@@ -26,6 +44,7 @@
         }
 
 
+        # Enable selected blacklist categories
         my @lists = split(/,/, $blacklist{'Categories'});
         # remove extension part, add 'bl-' prefix
         @lists = map { "bl-$_"  } @lists;

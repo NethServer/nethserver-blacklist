@@ -83,6 +83,10 @@ if [ "$STATUS" == "disabled" ]; then
     exit 0
 fi
 
+debug "Creating global whitelist"
+/sbin/ipset create -exist bl-whitelist hash:net
+cat $BLDIR/whitelist.global | sed '/^#/d; /^$/d' | sed "s/^/add bl-whitelist /" | /sbin/ipset restore
+
 for l in $LISTS; do
     file=''
     type=''
@@ -105,7 +109,7 @@ for l in $LISTS; do
     if [ $? -gt 0 ]; then
         warning "Can't create $name ipset"
     fi
-    cat $file | sed '/^#/d' | sed '/^$/d' | sed "s/^/add $name /" | /sbin/ipset restore
+    cat $file | sed '/^#/d; /^$/d' | sed "s/^/add $name /" | /sbin/ipset restore
     if [ $? -gt 0 ]; then
         warning "Can't load $name ipset"
     fi
