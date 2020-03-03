@@ -10,6 +10,7 @@
     "actions": "Actions",
     "search": "Search",
     "unknown": "Unknown",
+    "status": "Status",
     "dashboard": {
         "title": "Blacklist",
         "last_blacklist_definitions": "Last blacklist definitions",
@@ -26,7 +27,9 @@
         "blacklist_search_successful": "IP search completed",
         "blacklist_search_failed": "Error while searching IP address",
         "ip_not_blocked": "is not blocked by any blacklist category",
-        "ip_blocked_from_category": "is blocked by category"
+        "ip_blocked_from_category": "is blocked by category",
+        "blacklist_enabled": "Blacklist enabled",
+        "blacklist_disabled": "Blacklist disabled"
     },
     "settings": {
         "title": "Settings",

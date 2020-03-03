@@ -47,3 +47,11 @@ event_actions($event, qw(
    nethserver-blacklist-conf 20
    firewall-adjust 30
 ));
+
+validator_actions('fwobject-host-delete', qw(
+    blacklist-host-cidr-check 20
+));
+
+validator_actions('fwobject-cidr-delete', qw(
+    blacklist-host-cidr-check 20
+));

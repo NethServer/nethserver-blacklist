@@ -9,11 +9,31 @@
       <span class="pficon pficon-error-circle-o"></span>
       {{ errorMessage }}.
     </div>
+    <!-- status -->
+    <h3>{{$t('status')}}</h3>
+    <div v-if="!isLoaded.config" class="spinner form-spinner-loader mg-left-sm"></div>
+    <div v-if="isLoaded.config" class="row">
+      <div class="stats-container col-xs-12 col-sm-4 col-md-3 col-lg-2">
+        <span
+          :class="['card-pf-utilization-card-details-count stats-count', config.status ? 'pficon pficon-ok' : 'pficon-off']"
+          data-toggle="tooltip"
+          data-placement="top"
+          :title="$t(config.status? 'enabled' : 'disabled')"
+        ></span>
+        <span class="card-pf-utilization-card-details-description stats-description">
+          <span class="card-pf-utilization-card-details-line-2 stats-text">
+            <span v-if="config.status">{{ $t('dashboard.blacklist_enabled') }}</span>
+            <span v-else>{{ $t('dashboard.blacklist_disabled') }}</span>
+          </span>
+        </span>
+      </div>
+    </div>
     <!-- last updated -->
     <h3>{{$t('dashboard.last_blacklist_definitions')}}</h3>
     <div v-if="!isLoaded.lastUpdated" class="spinner form-spinner-loader mg-left-sm"></div>
     <div v-if="isLoaded.lastUpdated">
-      <p>{{ lastUpdatedWords }} ({{ lastUpdated | dateFormat }})</p>
+      <p v-if="lastUpdated">{{ lastUpdatedWords }} ({{ lastUpdated | dateFormat }})</p>
+      <p v-else>-</p>
       <button
         type="button"
         class="btn btn-default"
@@ -22,6 +42,7 @@
       >{{ $t('dashboard.check_for_updates') }}</button>
       <div v-if="!isLoaded.update" class="spinner form-spinner-loader mg-left-md"></div>
     </div>
+
     <!-- statistics -->
     <h3>{{$t('dashboard.statistics')}}</h3>
     <div v-if="!isLoaded.stats" class="spinner form-spinner-loader mg-left-sm"></div>
@@ -123,8 +144,12 @@ export default {
         lastUpdated: false,
         stats: false,
         categories: false,
+        config: false,
         update: true,
         search: true
+      },
+      config: {
+        status: false
       },
       lastUpdated: null,
       stats: {},
@@ -149,6 +174,7 @@ export default {
       this.errorMessage = null;
     },
     getDashboardData() {
+      this.getConfig();
       this.getLastUpdated();
       this.getStats();
       this.getCategories();
@@ -206,7 +232,6 @@ export default {
     getStats() {
       this.isLoaded.stats = false;
       const context = this;
-      context.isLoaded.config = false;
       nethserver.exec(
         ["nethserver-blacklist/dashboard/read"],
         {
@@ -358,6 +383,35 @@ export default {
         function(error, data) {
           console.error(error);
           context.isLoaded.search = true;
+        }
+      );
+    },
+    getConfig() {
+      const context = this;
+      context.isLoaded.config = false;
+      nethserver.exec(
+        ["nethserver-blacklist/settings/read"],
+        {
+          action: "configuration"
+        },
+        null,
+        function(success) {
+          try {
+            success = JSON.parse(success);
+            const props = success.configuration.props;
+
+            if (props.status === "enabled") {
+              context.config.status = true;
+            } else {
+              context.config.status = false;
+            }
+            context.isLoaded.config = true;
+          } catch (e) {
+            console.error(e);
+          }
+        },
+        function(error) {
+          console.error(error);
         }
       );
     }

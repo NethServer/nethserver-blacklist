@@ -162,4 +162,8 @@ export default {
 .adjust-top-loader {
   top: 0;
 }
+
+.mg-left-sm {
+  margin-left: 1rem;
+}
 </style>

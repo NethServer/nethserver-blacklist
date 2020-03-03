@@ -405,10 +405,12 @@ export default {
             context.isLoaded.categories = true;
           } catch (e) {
             console.error(e);
+            context.isLoaded.categories = true;
           }
         },
         function(error) {
           console.error(error);
+          context.isLoaded.categories = true;
         }
       );
     },
@@ -660,10 +662,6 @@ export default {
 </script>
 
 <style scoped>
-.mg-left-sm {
-  margin-left: 1rem;
-}
-
 .mg-left-5 {
   margin-left: 5px !important;
 }

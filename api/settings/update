@@ -30,7 +30,7 @@ url=$(echo $data | jq -r '.Url')
 whitelist=$(echo $data | jq -r '.Whitelist | join(",")')
 categories=$(echo $data | jq -r '.Categories | join(",")')
 
-current_url=`/sbin/e-smith/config getprop blacklist Url`
+current_url=$(/sbin/e-smith/config getprop blacklist Url)
 
 if [ "$status" = "enabled" ]; then
     /sbin/e-smith/config setprop blacklist status "$status" Url "$url" Whitelist "$whitelist" Categories "$categories"
@@ -58,17 +58,11 @@ if [ "$current_url" != "$url" ]; then
     if [ $? -gt 0 ]; then
         error "EventFailed" "See /var/log/messages"
     fi
+fi
 
-    # download new blacklist
-    /sbin/e-smith/signal-event -j nethserver-blacklist-save
-    if [ $? -gt 0 ]; then
-        error "EventFailed" "See /var/log/messages"
-    fi
-else
-    /sbin/e-smith/signal-event -j firewall-adjust
-    if [ $? -gt 0 ]; then
-        error "EventFailed" "See /var/log/messages"
-    fi
+/sbin/e-smith/signal-event -j nethserver-blacklist-save
+if [ $? -gt 0 ]; then
+    error "EventFailed" "See /var/log/messages"
 fi
 
 success
