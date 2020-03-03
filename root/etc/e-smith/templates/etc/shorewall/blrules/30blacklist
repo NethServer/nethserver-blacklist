@@ -25,7 +25,8 @@
 
         # Enable local whitelist
         foreach (split(/,/, $blacklist{'Whitelist'})) {
-            my $host = $fw->getAddress($_);
+            my $host = $fw->getAddress($_) || '';
+            next if ($host eq '');
             $OUT .= "WHITELIST\t".$fw->getZone($host)."\tloc\n";
             $OUT .= "WHITELIST\tloc\t".$fw->getZone($host)."\n";
 
