@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+
+use strict;
+use esmith::ConfigDB;
+
+my $dbName = shift;
+my $key = shift;
+my $db = esmith::ConfigDB->open_ro();
+my $whitelist = $db->get_prop("blacklist", "Whitelist");
+my @list = split(/,/, $whitelist);
+
+foreach (@list) {
+    if ($_ =~ /;/) {
+        my ($type, $name) = split(/;/, $_);
+        if ($name eq $key) {
+            print "$dbName:$key is used in blacklist application\n";
+            exit(1);
+        }
+    }
+}
+
+exit(0);

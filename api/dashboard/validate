@@ -1,0 +1,61 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import simplejson
+import re
+import os
+
+
+def invalid_attribute(parameter, error):
+    return {"parameter": parameter, "error": error, "value": ""}
+
+
+line = fileinput.input()[0].rstrip()
+input_json = simplejson.loads(line)
+invalid_attributes = []
+
+ip_address_p = 'ipAddress'
+
+if (ip_address_p not in input_json) or (not input_json[ip_address_p]):
+    invalid_attributes.append(invalid_attribute(ip_address_p, "empty"))
+else:
+    ip_address = input_json[ip_address_p]
+
+    if not re.match(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$", ip_address):
+        invalid_attributes.append(invalid_attribute(ip_address_p, "invalid"))
+
+# output
+success = len(invalid_attributes) == 0
+
+if success:
+    output = {"state": "success"}
+else:
+    output = {"type": "NotValid", "message": "validation_failed",
+              "attributes": invalid_attributes}
+
+output_json = simplejson.dumps(output)
+print(output_json)
+
+if not success:
+    sys.exit(1)

@@ -1,0 +1,122 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import subprocess
+import simplejson
+import os
+import re
+from datetime import datetime
+
+
+def get_last_updated():
+    dir = "/usr/share/nethserver-blacklist/ipsets"
+    bash_command = '/usr/bin/git --git-dir={}/.git/ --work-tree={} log -n1 --format="%at"'.format(
+        dir, dir)
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    return output.strip(" \"\n")
+
+
+def get_stats():
+    now = datetime.now()
+    month = now.strftime("%b")
+    day = now.strftime("%-d")
+
+    if len(day) < 2:
+        # sample /var/log/messages: "Mar  1 08:45:07 ..." (two spaces between month and day)
+        day = " " + day
+
+    today = "{} {}".format(month, day)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    # today total threats blocked
+    process = subprocess.Popen(
+        [dir_path + "/stats_total_hits", today], stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    stats_total = output.strip(" \"\n")
+
+    # today source hosts blocked
+    process = subprocess.Popen(
+        [dir_path + "/stats_src_hosts", today], stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output_lines = output.strip("\n").split("\n")
+    stats_src_hosts = []
+
+    for line in output_lines:
+        if (line):
+            tokens = line.split()
+            stats_src_hosts.append([tokens[1], int(tokens[0])])
+
+    # today destination hosts blocked
+    process = subprocess.Popen(
+        [dir_path + "/stats_dst_hosts", today], stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output_lines = output.strip("\n").split("\n")
+    stats_dst_hosts = []
+
+    for line in output_lines:
+        if (line):
+            tokens = line.split()
+            stats_dst_hosts.append([tokens[1], int(tokens[0])])
+
+    return {
+        "totalHits": stats_total,
+        "mostBlockedSrcHosts": stats_src_hosts,
+        "mostBlockedDstHosts": stats_dst_hosts
+    }
+
+
+def search_ip_address(ip_address):
+    bash_command = '/usr/share/nethserver-blacklist/search-ip -l {}'.format(
+        ip_address)
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.strip(" \"\n").replace("bl-", "")
+    return output
+
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    action = input_json["action"]
+
+    if action == 'last-updated':
+        last_updated = get_last_updated()
+        output = simplejson.dumps({'lastUpdated': last_updated})
+        print (output)
+    elif action == 'statistics':
+        stats = get_stats()
+        output = simplejson.dumps({'statistics': stats})
+        print (output)
+    elif action == 'search':
+        ip_address = input_json["ipAddress"]
+        search_result = search_ip_address(ip_address)
+        output = simplejson.dumps({'searchResult': search_result})
+        print (output)
+    else:
+        raise ValueError(
+            "action must be one of 'last-updated', 'stats' or 'search'")
+except Exception, e:
+    print simplejson.dumps({'error': "%s" % e})
+    sys.exit(1)

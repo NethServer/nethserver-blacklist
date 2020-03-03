@@ -1,0 +1,79 @@
+{
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "enable": "Enable",
+    "disable": "Disable",
+    "actions": "Actions",
+    "search": "Search",
+    "unknown": "Unknown",
+    "status": "Status",
+    "dashboard": {
+        "title": "Blacklist",
+        "last_blacklist_definitions": "Last blacklist definitions",
+        "statistics": "Statistics",
+        "today_total_threats_blocked": "threats blocked today",
+        "today_most_blocked_source_hosts": "Today most blocked source hosts",
+        "today_most_blocked_destination_hosts": "Today most blocked destination hosts",
+        "check_for_updates": "Check for updates",
+        "blacklist_update_successful": "Blacklist is up to date",
+        "blacklist_update_failed": "Error while updating blacklist",
+        "no_data": "No data",
+        "ip_search_title": "Search for IP address",
+        "ip_address": "IP address",
+        "blacklist_search_successful": "IP search completed",
+        "blacklist_search_failed": "Error while searching IP address",
+        "ip_not_blocked": "is not blocked by any blacklist category",
+        "ip_blocked_from_category": "is blocked by category",
+        "blacklist_enabled": "Blacklist enabled",
+        "blacklist_disabled": "Blacklist disabled"
+    },
+    "settings": {
+        "title": "Settings",
+        "download_url": "Download URL",
+        "categories": "Categories",
+        "name": "Name",
+        "confidence": "Confidence",
+        "type": "Type",
+        "maintainer": "Maintainer",
+        "whitelist": "Whitelist",
+        "new_whitelist_element_fw": "Host, IP address or CIDR subnet",
+        "new_whitelist_element": "IP address or CIDR subnet",
+        "settings_update_successful": "Settings updated successfully",
+        "settings_update_failed": "Error while updating settings",
+        "cidr_sub": "CIDR Subnet",
+        "host": "Host",
+        "firehol_level1_description": "A firewall blacklist composed from IP lists, providing maximum protection with minimum false positives. Suitable for basic protection on all internet facing servers, routers and firewalls. (includes: dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw)",
+        "firehol_level2_description": "An ipset made from blocklists that track attacks, during about the last 48 hours. (includes: blocklist_de dshield_1d greensnow)"
+    },
+    "logs": {
+        "title": "Logs",
+        "follow": "Follow",
+        "stop_follow": "Stop",
+        "start_follow_button": "Follow",
+        "stop_follow_button": "Stop following",
+        "filter_label": "Regexp filter"
+    },
+    "about": {
+        "title": "About",
+        "website": "Web site",
+        "bug_tracker": "Bug tracker"
+    },
+    "validation": {
+        "tcp_ports_and_udp_ports_empty": "At least one TCP or UDP port must be specified",
+        "whitelist_duplicates": "Duplicated whitelist entry",
+        "whitelist_invalid": "Invalid whitelist entry",
+        "whitelist_invalid_type": "Whitelist must be a list",
+        "url_empty": "Download URL is mandatory",
+        "url_invalid": "Invalid URL",
+        "url_invalid_git_repo": "Invalid git repository",
+        "ip_search_empty": "IP address is mandatory",
+        "ip_search_invalid": "Invalid IP address"
+    },
+    "docs": {
+        "blacklist_download_url": "This is where blacklist definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists."
+    }
+}
