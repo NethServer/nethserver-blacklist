@@ -31,18 +31,6 @@ def invalid_attribute(parameter, error):
     return {"parameter": parameter, "error": error, "value": ""}
 
 
-def get_category_ids():
-    path = "/usr/share/nethserver-blacklist/ipsets"
-    category_ids = []
-
-    for file_name in os.listdir(path):
-        if file_name.endswith(".ipset") or file_name.endswith(".netset"):
-            category_id = re.search(r"(.+)\..+", file_name).group(1)
-            category_ids.append(category_id)
-
-    return category_ids
-
-
 line = fileinput.input()[0].rstrip()
 input_json = simplejson.loads(line)
 invalid_attributes = []

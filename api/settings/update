@@ -29,7 +29,8 @@ status=$(echo $data | jq -r '.status')
 url=$(echo $data | jq -r '.Url')
 whitelist=$(echo $data | jq -r '.Whitelist | join(",")')
 categories=$(echo $data | jq -r '.Categories | join(",")')
-url_changed=$(echo $data | jq -r '.urlChanged')
+
+current_url=`/sbin/e-smith/config getprop blacklist Url`
 
 if [ "$status" = "enabled" ]; then
     /sbin/e-smith/config setprop blacklist status "$status" Url "$url" Whitelist "$whitelist" Categories "$categories"
@@ -45,7 +46,7 @@ else
     fi
 fi
 
-if [ "$url_changed" = true ]; then
+if [ "$current_url" != "$url" ]; then
     # clear active categories
     /sbin/e-smith/config setprop blacklist Categories ""
     if [ $? -gt 0 ]; then

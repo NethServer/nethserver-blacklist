@@ -36,18 +36,6 @@ def get_config():
     return simplejson.loads(output)
 
 
-def get_confidence(category_id):
-    confidence_7_categories = ['firehol_level1']
-    confidence_6_categories = ['firehol_level2']
-
-    if category_id in confidence_7_categories:
-        return 7
-    elif category_id in confidence_6_categories:
-        return 6
-    else:
-        return 4
-
-
 def get_categories():
     path = "/usr/share/nethserver-blacklist/ipsets"
     categories = []
@@ -55,7 +43,9 @@ def get_categories():
     for file_name in os.listdir(path):
         if file_name.endswith(".ipset") or file_name.endswith(".netset"):
             full_path = path + "/" + file_name
-            category = {}
+            category = {
+                'confidence': 0  # // default value
+            }
 
             with open(full_path) as f:
                 lines = f.readlines()
@@ -72,32 +62,30 @@ def get_categories():
                     maintainer = re.search(r"Maintainer\s+:\s+(\w+)", line)
                     if maintainer:
                         category['maintainer'] = maintainer.group(1)
+                        continue
 
                     category_type = re.search(r"Category\s+:\s+(\w+)", line)
                     if category_type:
                         category['type'] = category_type.group(1)
+                        continue
 
                     confidence = re.search(r"Confidence\s+:\s+(\w+)", line)
                     if confidence:
-                        category['confidence'] = confidence.group(1)
+                        category['confidence'] = int(confidence.group(1))
+                        continue
 
             f.closed
             category_id = re.search(r"(.+)\..+", file_name).group(1)
             category['id'] = category_id
             name = category_id.replace("_", " ").capitalize()
             category['name'] = name
-            confidence = get_confidence(category_id)
-            category['confidence'] = confidence
             categories.append(category)
 
     return categories
 
 
 def is_firewall_ui_installed():
-    bash_command = "/usr/bin/rpm -q nethserver-firewall-base-ui"
-    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-    return process.returncode == 0
+    return os.path.exists("/usr/share/cockpit/nethserver/applications/nethserver-firewall-base.json")
 
 
 try:

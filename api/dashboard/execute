@@ -24,4 +24,4 @@
 # Download the blacklists
 #
 
-exec /usr/share/nethserver-blacklist/download
+/usr/share/nethserver-blacklist/download

@@ -174,8 +174,11 @@
             </td>
             <td :class="['fancy', {'gray': !props.row.selected}]">
               <span
-                :class="['confidence', props.row.selected ? (parseInt(props.row.confidence) > 6 ? 'green' : 'orange') : 'gray']"
-              >{{props.row.confidence}}/10</span>
+                :class="['confidence', props.row.selected ? (props.row.confidence > 6 ? 'green' : 'orange') : 'gray']"
+              >
+                <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
+                <span v-else>{{ $t('unknown') }}</span>
+              </span>
             </td>
             <td :class="['fancy', {'gray': !props.row.selected}]">{{props.row.type | capitalize}}</td>
             <td :class="['fancy', {'gray': !props.row.selected}]">{{props.row.maintainer}}</td>
@@ -231,7 +234,7 @@ export default {
         {
           label: this.$i18n.t("settings.name"),
           field: "name",
-          sortable: false
+          sortable: true
         },
         {
           label: this.$i18n.t("settings.confidence"),
@@ -469,7 +472,6 @@ export default {
       nethserver.notifications.error = this.$i18n.t(
         "settings.settings_update_failed"
       );
-      validateObj.urlChanged = this.config.lastUrl !== this.config.url;
       const context = this;
       nethserver.exec(
         ["nethserver-blacklist/settings/update"],
@@ -498,10 +500,10 @@ export default {
         const attr = errorData.attributes[e];
         const param = attr.parameter;
 
-        if (param === "BlackListUrl") {
+        if (param === "Url") {
           this.error.url = attr.error;
           this.$refs.blacklistUrl.focus();
-        } else if (param === "WhiteList") {
+        } else if (param === "Whitelist") {
           this.error.whitelist = attr.error;
         }
       }

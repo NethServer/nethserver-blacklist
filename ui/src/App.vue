@@ -158,4 +158,8 @@ export default {
 .padding-30 {
   padding: 30px;
 }
+
+.adjust-top-loader {
+  top: 0;
+}
 </style>

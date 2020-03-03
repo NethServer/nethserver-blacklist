@@ -25,22 +25,11 @@ import fileinput
 import simplejson
 import re
 import os
+import subprocess
 
 
 def invalid_attribute(parameter, error):
     return {"parameter": parameter, "error": error, "value": ""}
-
-
-def get_category_ids():
-    path = "/usr/share/nethserver-blacklist/ipsets"
-    category_ids = []
-
-    for file_name in os.listdir(path):
-        if file_name.endswith(".ipset") or file_name.endswith(".netset"):
-            category_id = re.search(r"(.+)\..+", file_name).group(1)
-            category_ids.append(category_id)
-
-    return category_ids
 
 
 line = fileinput.input()[0].rstrip()
@@ -75,8 +64,19 @@ if status == 'enabled':
     else:
         url = input_json[url_p]
 
+        # check syntax
         if not re.match(r"(?:http\:|https\:)?\/\/.+\..+", url):
             invalid_attributes.append(invalid_attribute(url_p, "invalid"))
+
+        # check git repo validity
+        bash_command = "/usr/bin/git ls-remote " + url
+        process = subprocess.Popen(
+            bash_command.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
+        if process.returncode != 0:
+            invalid_attributes.append(
+                invalid_attribute(url_p, "invalid_git_repo"))
 
     # whitelist
     if whitelist_p not in input_json:
@@ -110,13 +110,6 @@ if status == 'enabled':
         if not type(categories) is list:
             invalid_attributes.append(
                 invalid_attribute(categories_p, "invalid_type"))
-
-        all_category_ids = get_category_ids()
-
-        for category in categories:
-            if category not in all_category_ids:
-                invalid_attributes.append(
-                    invalid_attribute(categories_p, "invalid"))
 
         # check duplicates
         if len(categories) != len(set(categories)):

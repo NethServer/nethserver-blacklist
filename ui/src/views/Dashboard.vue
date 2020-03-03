@@ -73,7 +73,10 @@
         <label class="col-sm-2 control-label" for="ip-search">{{$t('dashboard.ip_address')}}</label>
         <div class="col-sm-3">
           <input type="text" v-model="ipSearch" id="ip-search" ref="ipSearch" class="form-control" />
-          <span v-if="error.ipSearch" class="help-block">{{$t('validation.ip_search_' + error.ipSearch)}}</span>
+          <span
+            v-if="error.ipSearch"
+            class="help-block"
+          >{{$t('validation.ip_search_' + error.ipSearch)}}</span>
         </div>
       </div>
       <!-- search button -->
@@ -134,7 +137,7 @@ export default {
       showIpSearchResult: false,
       error: {
         ipSearch: false
-      },
+      }
     };
   },
   methods: {
