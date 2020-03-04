@@ -66,7 +66,7 @@
         </button>
       </div>
     </form>
-    <div v-if="!view.logsLoaded" id="loader" class="spinner spinner-lg view-spinner"></div>
+    <div v-if="!view.logsLoaded" id="loader" class="spinner spinner-lg view-spinner mg-top-md"></div>
     <div v-else>
       <pre v-if="view.logsContent" id="logs-output" class="logs">{{view.logsContent}}</pre>
       <pre v-else id="logs-output" class="logs">-- No entries --</pre>
@@ -139,7 +139,18 @@ export default {
     },
     getLogs() {
       // pre-filter lines containing "blacklst"
-      const filterPattern = "blacklst.*" + this.view.filter + "\\|" + this.view.filter + ".*blacklst";
+      let filterPattern;
+
+      if (this.view.filter) {
+        filterPattern =
+          "blacklst.*" +
+          this.view.filter +
+          "\\|" +
+          this.view.filter +
+          ".*blacklst";
+      } else {
+        filterPattern = "blacklst";
+      }
       var context = this;
       this.process = nethserver.readLogs(
         {

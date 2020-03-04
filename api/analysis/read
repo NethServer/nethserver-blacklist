@@ -1,0 +1,124 @@
+#!/usr/bin/python
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+import sys
+import fileinput
+import subprocess
+import simplejson
+import re
+import os
+
+
+def filter_match(filter, items):
+    if not filter:
+        return True
+
+    for item in items:
+        if filter in item:
+            return True
+    return False
+
+
+def get_logs(filter, lines):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    process = subprocess.Popen(
+        [dir_path + "/get_logs", str(lines)], stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    log_lines = output.strip(" \n").split("\n")
+    logs = []
+
+    for line in log_lines:
+        if (line):
+            match = re.search(
+                r"^[\w]+\s+[0-9]+\s+([0-9]+)\:([0-9]+)\:([0-9]+).+IN=(\S+).+SRC=(\S+).+DST=(\S+).+PROTO=(\S+).+DPT=([0-9]+)", line)
+            if match:
+                hh = match.group(1)
+                mm = match.group(2)
+                ss = match.group(3)
+                seconds = int(hh) * 3600 + int(mm) * 60 + int(ss)
+                time = hh + ":" + mm + ":" + ss
+
+                interface = match.group(4)
+                source = match.group(5)
+                dest = match.group(6)
+                protocol = match.group(7)
+                dest_port = match.group(8)
+
+                # check if filter is contained in extracted data only
+                if filter_match(filter, [time, interface, source, dest, protocol, dest_port]):
+                    # retrieve service name
+                    process = subprocess.Popen(
+                        ['/usr/bin/grep', "\s" + dest_port + "/" + protocol.lower(), '/etc/services'], stdout=subprocess.PIPE)
+                    output, error = process.communicate()
+                    tokens = output.strip(" \n").split()
+
+                    if tokens:
+                        dest_service = tokens[0]
+                    else:
+                        # service name not found
+                        dest_service = ""
+
+                    log = {
+                        "time": time,
+                        "seconds": seconds,
+                        "interface": interface,
+                        "source": source,
+                        "dest": dest,
+                        "protocol": protocol,
+                        "dest_port": int(dest_port),
+                        "dest_service": dest_service
+                    }
+                    logs.insert(0, log)  # most recent logs first
+    return logs
+
+
+def search_ip_address(ip_address):
+    bash_command = '/usr/share/nethserver-blacklist/search-ip -l {}'.format(
+        ip_address)
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.strip(" \"\n").replace("bl-", "")
+    return output
+
+
+try:
+    line = fileinput.input()[0].rstrip()
+    input_json = simplejson.loads(line)
+    action = input_json["action"]
+
+    if action == 'logs':
+        filter = input_json["filter"]
+        lines = input_json["lines"]
+        logs = get_logs(filter, lines)
+        output = simplejson.dumps({'logs': logs})
+        print (output)
+    elif action == 'search':
+        ip_address = input_json["ipAddress"]
+        search_result = search_ip_address(ip_address)
+        output = simplejson.dumps({'searchResult': search_result})
+        print (output)
+    else:
+        raise ValueError(
+            "action must be one of 'logs' or 'search'")
+except Exception, e:
+    print simplejson.dumps({'error': "%s" % e})
+    sys.exit(1)

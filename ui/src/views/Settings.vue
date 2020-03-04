@@ -1,3 +1,25 @@
+<!--
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+-->
+
 <template>
   <div>
     <h2>{{$t('settings.title')}}</h2>
@@ -159,8 +181,6 @@
           :globalSearchPlaceholder="tableLangsTexts.globalSearchPlaceholder"
           :ofText="tableLangsTexts.ofText"
         >
-          class="category-table"
-          >
           <template slot="table-row" slot-scope="props">
             <td :class="['fancy', {'gray': !props.row.selected}]">
               <span :title="$t(props.row.selected ? 'enabled' : 'disabled')">
@@ -168,8 +188,8 @@
                   :class="['category-status-icon', 'pficon', props.row.selected ? ['pficon-ok', 'green'] : 'pficon-off']"
                 ></span>
               </span>
-              <span :title="$t('settings.' + props.row.id + '_description')">
-                <span class="semi-bold">{{props.row.name}}</span>
+              <span :title="$t(props.row.id + '_description')">
+                <span class="semi-bold">{{$t(props.row.id)}}</span>
               </span>
             </td>
             <td :class="['fancy', {'gray': !props.row.selected}]">
@@ -664,10 +684,6 @@ export default {
 <style scoped>
 .mg-left-5 {
   margin-left: 5px !important;
-}
-
-.mg-top-md {
-  margin-top: 2rem;
 }
 
 .category-table {

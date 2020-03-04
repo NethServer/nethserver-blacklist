@@ -11,25 +11,36 @@
     "search": "Search",
     "unknown": "Unknown",
     "status": "Status",
+    "of": "of",
+    "rows_per_page": "Rows per page",
+    "all": "All",
+    "firehol_level1": "FireHOL level 1",
+    "firehol_level2": "FireHOL level 1",
+    "firehol_level1_description": "A firewall blacklist composed from IP lists, providing maximum protection with minimum false positives. Suitable for basic protection on all internet facing servers, routers and firewalls. (includes: dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw)",
+    "firehol_level2_description": "An ipset made from blocklists that track attacks, during about the last 48 hours. (includes: blocklist_de dshield_1d greensnow)",
+    "nethesis_level3": "Nethesis level 3",
+    "yoroi_malware_level1": "Yoroi malware level 1",
+    "yoroi_malware_level2": "Yoroi malware level 2",
+    "yoroi_souspicious_level1": "Yoroi suspicious level 1",
+    "yoroi_souspicious_level2": "Yoroi suspicious level 2",
+    "nethesis_level3_description": "Nethesis threat intelligence feed",
+    "yoroi_malware_level1_description": "Yoroi threat intelligence feed: yoroi_malware_level1",
+    "yoroi_malware_level2_description": "Yoroi threat intelligence feed: yoroi_malware_level2",
+    "yoroi_souspicious_level1_description": "Yoroi threat intelligence feed: yoroi_souspicious_level1",
+    "yoroi_souspicious_level2_description": "Yoroi threat intelligence feed: yoroi_souspicious_level2",
     "dashboard": {
-        "title": "Blacklist",
-        "last_blacklist_definitions": "Last blacklist definitions",
+        "title": "Threat shield",
+        "last_blacklist_definitions": "Last threats definitions",
         "statistics": "Statistics",
         "today_total_threats_blocked": "threats blocked today",
         "today_most_blocked_source_hosts": "Today most blocked source hosts",
         "today_most_blocked_destination_hosts": "Today most blocked destination hosts",
         "check_for_updates": "Check for updates",
-        "blacklist_update_successful": "Blacklist is up to date",
-        "blacklist_update_failed": "Error while updating blacklist",
+        "blacklist_update_successful": "Threat shield is up to date",
+        "blacklist_update_failed": "Error while updating threats definitions",
         "no_data": "No data",
-        "ip_search_title": "Search for IP address",
-        "ip_address": "IP address",
-        "blacklist_search_successful": "IP search completed",
-        "blacklist_search_failed": "Error while searching IP address",
-        "ip_not_blocked": "is not blocked by any blacklist category",
-        "ip_blocked_from_category": "is blocked by category",
-        "blacklist_enabled": "Blacklist enabled",
-        "blacklist_disabled": "Blacklist disabled"
+        "blacklist_enabled": "Threat shield enabled",
+        "blacklist_disabled": "Threat shield disabled"
     },
     "settings": {
         "title": "Settings",
@@ -45,9 +56,28 @@
         "settings_update_successful": "Settings updated successfully",
         "settings_update_failed": "Error while updating settings",
         "cidr_sub": "CIDR Subnet",
-        "host": "Host",
-        "firehol_level1_description": "A firewall blacklist composed from IP lists, providing maximum protection with minimum false positives. Suitable for basic protection on all internet facing servers, routers and firewalls. (includes: dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw)",
-        "firehol_level2_description": "An ipset made from blocklists that track attacks, during about the last 48 hours. (includes: blocklist_de dshield_1d greensnow)"
+        "host": "Host"
+    },
+    "analysis": {
+        "title": "Analysis",
+        "less_recent": "Less recent",
+        "more_recent": "More recent",
+        "time": "Time",
+        "interface": "Interface",
+        "source": "Source",
+        "destination": "Destination",
+        "protocol": "Protocol",
+        "destination_port": "Destination port",
+        "filter": "Search filter",
+        "lines": "Max lines",
+        "lines_placeholder": "Maximum number of log lines",
+        "logs": "Today logs",
+        "ip_search_title": "Check IP address",
+        "ip_address": "IP address",
+        "ip_not_blocked": "is not blocked by Threat shield",
+        "ip_blocked_from_category": "is blocked by category",
+        "check": "Check",
+        "search_logs": "Search logs"
     },
     "logs": {
         "title": "Logs",
@@ -74,6 +104,7 @@
         "ip_search_invalid": "Invalid IP address"
     },
     "docs": {
-        "blacklist_download_url": "This is where blacklist definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists."
+        "blacklist_download_url": "This is where threats (blacklist) definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists",
+        "search_ip_address": "Check if this IP address is blocked by Threat shield blacklist"
     }
 }

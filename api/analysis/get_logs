@@ -21,7 +21,7 @@
 #
 
 #
-# Find today total blocked accesses. First argument must be a day of month with this format: "Feb 25"
+# Get today logs. First argument is the maximum number of lines to retrieve
 #
 
-/usr/bin/grep "$1" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/wc -l
+/usr/bin/grep "$(date +"%b %e")" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/tail -n "$1"

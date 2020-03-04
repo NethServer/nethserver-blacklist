@@ -1,15 +1,15 @@
 {
     "id": "nethserver-blacklist",
-    "name": "Blacklist",
-    "summary": "Nethserver blacklist",
-    "description": "Nethserver blacklist",
+    "name": "Threat shield",
+    "summary": "Threat shield",
+    "description": "Nethserver blacklist based on IPSet",
     "url": "",
     "homepage": "https://github.com/NethServer/nethserver-blacklist",
     "provides": ["nethserver-blacklist"],
     "release": {
         "version": "_RELEASE_"
     },
-    "tags": ["blacklist", "ipsets", "nethserver"],
+    "tags": ["blacklist", "ipset", "nethserver", "threat", "shield"],
     "license": "GPL-3.0",
     "bugs": {
         "url": "https://github.com/NethServer/dev/issues"
