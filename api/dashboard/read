@@ -87,15 +87,6 @@ def get_stats():
     }
 
 
-def search_ip_address(ip_address):
-    bash_command = '/usr/share/nethserver-blacklist/search-ip -l {}'.format(
-        ip_address)
-    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-    output = output.strip(" \"\n").replace("bl-", "")
-    return output
-
-
 try:
     line = fileinput.input()[0].rstrip()
     input_json = simplejson.loads(line)
@@ -109,14 +100,9 @@ try:
         stats = get_stats()
         output = simplejson.dumps({'statistics': stats})
         print (output)
-    elif action == 'search':
-        ip_address = input_json["ipAddress"]
-        search_result = search_ip_address(ip_address)
-        output = simplejson.dumps({'searchResult': search_result})
-        print (output)
     else:
         raise ValueError(
-            "action must be one of 'last-updated', 'stats' or 'search'")
+            "action must be one of 'last-updated' or 'statistics'")
 except Exception, e:
     print simplejson.dumps({'error': "%s" % e})
     sys.exit(1)

@@ -24,4 +24,10 @@
 # Download the blacklists
 #
 
+. /usr/libexec/nethserver/api/lib/helper_functions
+
 /usr/share/nethserver-blacklist/download
+
+if [ $? -gt 0 ]; then
+    error "BlacklistDownloadFailed" "See /var/log/messages"
+fi

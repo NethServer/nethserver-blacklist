@@ -38,6 +38,13 @@
                 </a>
             </router-link>
             <li class="li-empty"></li>
+            <router-link tag="li" to="/analysis" active-class="active" class="list-group-item">
+                <a>
+                    <span class="fa fa-search"></span>
+                    <span class="list-group-item-value">{{$t('analysis.title')}}</span>
+                </a>
+            </router-link>
+            <li class="li-empty"></li>
             <router-link tag="li" to="/logs" active-class="active" class="list-group-item">
                 <a>
                     <span class="fa fa-list"></span>
@@ -165,5 +172,9 @@ export default {
 
 .mg-left-sm {
   margin-left: 1rem;
+}
+
+.mg-top-md {
+  margin-top: 2rem;
 }
 </style>

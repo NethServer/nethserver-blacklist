@@ -31,6 +31,7 @@ import VueSuggestions from 'v-suggestions';
 import App from './App.vue'
 import Dashboard from './views/Dashboard.vue'
 import Settings from './views/Settings.vue'
+import Analysis from './views/Analysis.vue'
 import Logs from './views/Logs.vue'
 import About from './views/About.vue'
 import "./filters/filters"
@@ -58,6 +59,7 @@ const router = new Router({
       { path: '/', redirect: '/dashboard'},
       { path: '/dashboard', component: Dashboard },
       { path: '/settings', component: Settings },
+      { path: '/analysis', component: Analysis },
       { path: '/logs', component: Logs },
       { path: '/about', name: 'about', component: About },
       { path: "*", redirect: "/" }

@@ -1,3 +1,25 @@
+<!--
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+-->
+
 <template>
   <div>
     <h2>{{$t('dashboard.title')}}</h2>
@@ -87,46 +109,6 @@
         </div>
       </div>
     </div>
-    <!-- IP search -->
-    <h3>{{$t('dashboard.ip_search_title')}}</h3>
-    <form class="form-horizontal" v-on:submit.prevent="validateSearchIp()">
-      <div :class="['form-group', {'has-error': error.ipSearch}]">
-        <label class="col-sm-2 control-label" for="ip-search">{{$t('dashboard.ip_address')}}</label>
-        <div class="col-sm-3">
-          <input type="text" v-model="ipSearch" id="ip-search" ref="ipSearch" class="form-control" />
-          <span
-            v-if="error.ipSearch"
-            class="help-block"
-          >{{$t('validation.ip_search_' + error.ipSearch)}}</span>
-        </div>
-      </div>
-      <!-- search button -->
-      <div class="form-group">
-        <label class="col-sm-2 control-label label-loader">
-          <div
-            v-if="!isLoaded.search"
-            class="spinner spinner-sm form-spinner-loader adjust-top-loader"
-          ></div>
-        </label>
-        <span class="col-sm-2">
-          <button
-            class="btn btn-primary"
-            type="submit"
-            :disabled="!isLoaded.search || !isLoaded.categories"
-          >{{$t('search')}}</button>
-        </span>
-      </div>
-    </form>
-    <div v-if="showIpSearchResult" class="alert alert-info alert-dismissable">
-      <span class="pficon pficon-info"></span>
-      {{$t('dashboard.ip_address')}}
-      <b>{{ ipSearchCompleted }}</b>
-      <span v-if="ipSearchResult">
-        {{ $t('dashboard.ip_blocked_from_category') }}
-        <b>{{ ipSearchResult }}</b>
-      </span>
-      <span v-if="!ipSearchResult">&nbsp;{{ $t('dashboard.ip_not_blocked') }}</span>
-    </div>
   </div>
 </template>
 
@@ -143,26 +125,14 @@ export default {
       isLoaded: {
         lastUpdated: false,
         stats: false,
-        categories: false,
         config: false,
-        update: true,
-        search: true
+        update: true
       },
       config: {
         status: false
       },
       lastUpdated: null,
-      stats: {},
-      error: {
-        ipSearch: false
-      },
-      ipSearch: "",
-      ipSearchCompleted: "",
-      ipSearchResult: "",
-      showIpSearchResult: false,
-      error: {
-        ipSearch: false
-      }
+      stats: {}
     };
   },
   methods: {
@@ -177,30 +147,6 @@ export default {
       this.getConfig();
       this.getLastUpdated();
       this.getStats();
-      this.getCategories();
-    },
-    getCategories() {
-      const context = this;
-      context.isLoaded.categories = false;
-      nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
-        {
-          action: "categories"
-        },
-        null,
-        function(success) {
-          try {
-            success = JSON.parse(success);
-            context.allCategories = success.categories;
-            context.isLoaded.categories = true;
-          } catch (e) {
-            console.error(e);
-          }
-        },
-        function(error) {
-          console.error(error);
-        }
-      );
     },
     getLastUpdated() {
       const context = this;
@@ -316,73 +262,6 @@ export default {
         function(error, data) {
           console.error(error);
           context.isLoaded.update = true;
-        }
-      );
-    },
-    validateSearchIp() {
-      this.error.ipSearch = false;
-      this.isLoaded.search = false;
-      this.showIpSearchResult = false;
-
-      var validateObj = {
-        action: "search",
-        ipAddress: this.ipSearch
-      };
-
-      const context = this;
-      nethserver.exec(
-        ["nethserver-blacklist/dashboard/validate"],
-        validateObj,
-        null,
-        function(success) {
-          context.searchIp(validateObj);
-        },
-        function(error, data) {
-          context.validationError(error, data);
-        }
-      );
-    },
-    validationError(error, data) {
-      this.isLoaded.search = true;
-      const errorData = JSON.parse(data);
-
-      for (const e in errorData.attributes) {
-        const attr = errorData.attributes[e];
-        const param = attr.parameter;
-
-        if (param === "ipAddress") {
-          this.error.ipSearch = attr.error;
-          this.$refs.ipSearch.focus();
-        }
-      }
-    },
-    searchIp(validateObj) {
-      var context = this;
-      nethserver.exec(
-        ["nethserver-blacklist/dashboard/read"],
-        validateObj,
-        null,
-        function(success) {
-          success = JSON.parse(success);
-          context.isLoaded.search = true;
-          context.ipSearchResult = success.searchResult;
-          context.ipSearchCompleted = context.ipSearch;
-
-          if (context.ipSearchResult) {
-            // retrieve category name
-            var categoryFound = context.allCategories.find(category => {
-              return category.id === context.ipSearchResult;
-            });
-
-            if (categoryFound) {
-              context.ipSearchResult = categoryFound.name;
-            }
-          }
-          context.showIpSearchResult = true;
-        },
-        function(error, data) {
-          console.error(error);
-          context.isLoaded.search = true;
         }
       );
     },
