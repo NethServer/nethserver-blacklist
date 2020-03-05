@@ -1,0 +1,13 @@
+#
+# nsapi_nethserver_blacklist
+#
+Cmnd_Alias NSAPI_NETHSERVER_BLACKLIST = \
+    /usr/libexec/nethserver/api/nethserver-blacklist/analysis/read, \
+    /usr/libexec/nethserver/api/nethserver-blacklist/analysis/validate, \
+    /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/execute, \
+    /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/read, \
+    /usr/libexec/nethserver/api/nethserver-blacklist/settings/read, \
+    /usr/libexec/nethserver/api/nethserver-blacklist/settings/update, \
+    /usr/libexec/nethserver/api/nethserver-blacklist/settings/validate
+
+Defaults!NSAPI_NETHSERVER_BLACKLIST !requiretty
