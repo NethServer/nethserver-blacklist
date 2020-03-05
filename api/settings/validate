@@ -26,10 +26,17 @@ import simplejson
 import re
 import os
 import subprocess
+from urlparse import urlparse
 
 
 def invalid_attribute(parameter, error):
     return {"parameter": parameter, "error": error, "value": ""}
+
+def get_subscription():
+    bash_command = "/sbin/e-smith/config getjson subscription"
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    return simplejson.loads(output)
 
 
 line = fileinput.input()[0].rstrip()
@@ -69,6 +76,11 @@ if status == 'enabled':
             invalid_attributes.append(invalid_attribute(url_p, "invalid"))
 
         # check git repo validity
+        subscription = get_subscription()
+        if (subscription['props']['SystemId'] and subscription['props']['Secret']):
+            parsed = urlparse(url)
+            url = "{}://{}:{}@{}{}{}".format(parsed.scheme, subscription['props']['SystemId'], subscription['props']['Secret'], parsed.netloc, parsed.path, parsed.query)
+
         bash_command = "/usr/bin/git ls-remote " + url
         process = subprocess.Popen(
             bash_command.split(), stdout=subprocess.PIPE)
