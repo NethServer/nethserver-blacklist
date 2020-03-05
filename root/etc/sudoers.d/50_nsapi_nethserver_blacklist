@@ -2,14 +2,10 @@
 # nsapi_nethserver_blacklist
 #
 Cmnd_Alias NSAPI_NETHSERVER_BLACKLIST = \
-    /usr/libexec/nethserver/api/nethserver-blacklist/analysis/get_logs, \
     /usr/libexec/nethserver/api/nethserver-blacklist/analysis/read, \
     /usr/libexec/nethserver/api/nethserver-blacklist/analysis/validate, \
     /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/execute, \
     /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/read, \
-    /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/stats_dst_hosts, \
-    /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/stats_src_hosts, \
-    /usr/libexec/nethserver/api/nethserver-blacklist/dashboard/stats_total_hits, \
     /usr/libexec/nethserver/api/nethserver-blacklist/settings/read, \
     /usr/libexec/nethserver/api/nethserver-blacklist/settings/update, \
     /usr/libexec/nethserver/api/nethserver-blacklist/settings/validate
