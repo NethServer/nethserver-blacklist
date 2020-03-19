@@ -117,14 +117,16 @@ export default {
         logsContent: "",
         follow: false,
         filter: "",
-        lines: 5000,
+        lines: 500,
         process: null
       }
     };
   },
   beforeRouteLeave(to, from, next) {
     $(".modal").modal("hide");
-    this.process.close();
+    if (this.process) {
+      this.process.close();
+    }
     next();
   },
   methods: {
@@ -138,32 +140,16 @@ export default {
       this.getLogs();
     },
     getLogs() {
-      // pre-filter lines containing "blacklst"
-      let filterPattern;
-
-      if (this.view.filter) {
-        filterPattern =
-          "blacklst.*" +
-          this.view.filter +
-          "\\|" +
-          this.view.filter +
-          ".*blacklst";
-      } else {
-        filterPattern = "blacklst";
-      }
-      var context = this;
+      const context = this;
       this.process = nethserver.readLogs(
         {
           action: this.view.follow ? "follow" : "dump",
           lines: this.view.follow ? null : this.view.lines,
-          mode: "file",
-          filter: filterPattern,
-          paths: [this.view.path]
+          filter: this.view.filter
         },
         this.view.follow
           ? function(stream) {
               context.view.logsLoaded = true;
-
               context.view.logsContent += stream;
 
               document.getElementById(
@@ -186,7 +172,8 @@ export default {
           context.view.logsLoaded = true;
           context.logsContent = error;
         },
-        true
+        true,
+        "nethserver-blacklist/logs/execute"
       );
     }
   }

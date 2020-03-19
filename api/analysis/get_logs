@@ -21,7 +21,7 @@
 #
 
 #
-# Get today logs. First argument is the maximum number of lines to retrieve
+# Get recent logs. First argument is the maximum number of lines to retrieve
 #
 
-/usr/bin/grep "$(date +"%b %e")" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/tail -n "$1"
+/usr/bin/grep blacklst /var/log/firewall.log | /usr/bin/tail -n "$1"

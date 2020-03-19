@@ -174,7 +174,27 @@ export default {
   margin-left: 1rem;
 }
 
+.mg-right-sm {
+  margin-right: 1rem;
+}
+
+.mg-right-md {
+  margin-right: 2rem;
+}
+
+.mg-right-xs {
+  margin-right: 0.5rem;
+}
+
 .mg-top-md {
   margin-top: 2rem;
+}
+
+.mg-top-sm {
+  margin-bottom: 1rem;
+}
+
+.right {
+  float: right;
 }
 </style>

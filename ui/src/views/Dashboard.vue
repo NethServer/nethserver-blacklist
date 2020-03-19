@@ -58,8 +58,8 @@
       <p v-else>-</p>
       <button
         type="button"
-        class="btn btn-default"
-        :disabled="!isLoaded.update"
+        class="btn btn-default mg-top-sm"
+        :disabled="!isLoaded.update || !config.url"
         @click="updateBlacklist()"
       >{{ $t('dashboard.check_for_updates') }}</button>
       <div v-if="!isLoaded.update" class="spinner form-spinner-loader mg-left-md"></div>
@@ -129,7 +129,8 @@ export default {
         update: true
       },
       config: {
-        status: false
+        status: false,
+        url: null
       },
       lastUpdated: null,
       stats: {}
@@ -278,6 +279,7 @@ export default {
           try {
             success = JSON.parse(success);
             const props = success.configuration.props;
+            context.config.url = props.Url;
 
             if (props.status === "enabled") {
               context.config.status = true;

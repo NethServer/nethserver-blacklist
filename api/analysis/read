@@ -26,6 +26,8 @@ import subprocess
 import simplejson
 import re
 import os
+import datetime
+import time
 
 
 def filter_match(filter, items):
@@ -33,7 +35,7 @@ def filter_match(filter, items):
         return True
 
     for item in items:
-        if filter in item:
+        if filter.lower() in item.lower():
             return True
     return False
 
@@ -49,36 +51,35 @@ def get_logs(filter, lines):
     for line in log_lines:
         if (line):
             match = re.search(
-                r"^[\w]+\s+[0-9]+\s+([0-9]+)\:([0-9]+)\:([0-9]+).+IN=(\S+).+SRC=(\S+).+DST=(\S+).+PROTO=(\S+).+DPT=([0-9]+)", line)
+                r"^([\w]+\s+[0-9]+\s+[0-9]+\:[0-9]+\:[0-9]+).+IN=(\S+).+SRC=(\S+).+DST=(\S+).+PROTO=(\S+).+DPT=([0-9]+)", line)
             if match:
-                hh = match.group(1)
-                mm = match.group(2)
-                ss = match.group(3)
-                seconds = int(hh) * 3600 + int(mm) * 60 + int(ss)
-                time = hh + ":" + mm + ":" + ss
+                log_time = match.group(1)
+                date = str(datetime.datetime.now().year) + ' ' + log_time
+                date_format = '%Y %b %d %H:%M:%S'
+                seconds = int(time.mktime(time.strptime(date, date_format))) # unix epoch
 
-                interface = match.group(4)
-                source = match.group(5)
-                dest = match.group(6)
-                protocol = match.group(7)
-                dest_port = match.group(8)
+                interface = match.group(2)
+                source = match.group(3)
+                dest = match.group(4)
+                protocol = match.group(5)
+                dest_port = match.group(6)
+
+                # retrieve service name
+                process = subprocess.Popen(
+                    ['/usr/bin/grep', "\s" + dest_port + "/" + protocol.lower(), '/etc/services'], stdout=subprocess.PIPE)
+                output, error = process.communicate()
+                tokens = output.strip(" \n").split()
+
+                if tokens:
+                    dest_service = tokens[0]
+                else:
+                    # service name not found
+                    dest_service = ""
 
                 # check if filter is contained in extracted data only
-                if filter_match(filter, [time, interface, source, dest, protocol, dest_port]):
-                    # retrieve service name
-                    process = subprocess.Popen(
-                        ['/usr/bin/grep', "\s" + dest_port + "/" + protocol.lower(), '/etc/services'], stdout=subprocess.PIPE)
-                    output, error = process.communicate()
-                    tokens = output.strip(" \n").split()
-
-                    if tokens:
-                        dest_service = tokens[0]
-                    else:
-                        # service name not found
-                        dest_service = ""
-
+                if filter_match(filter, [log_time, interface, source, dest, protocol, dest_port, dest_service]):
                     log = {
-                        "time": time,
+                        "time": log_time,
                         "seconds": seconds,
                         "interface": interface,
                         "source": source,
