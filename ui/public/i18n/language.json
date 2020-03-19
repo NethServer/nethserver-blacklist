@@ -26,8 +26,8 @@
     "nethesis_level3_description": "Nethesis threat intelligence feed",
     "yoroi_malware_level1_description": "Yoroi threat intelligence feed: yoroi_malware_level1",
     "yoroi_malware_level2_description": "Yoroi threat intelligence feed: yoroi_malware_level2",
-    "yoroi_souspicious_level1_description": "Yoroi threat intelligence feed: yoroi_souspicious_level1",
-    "yoroi_souspicious_level2_description": "Yoroi threat intelligence feed: yoroi_souspicious_level2",
+    "yoroi_souspicious_level1_description": "Yoroi threat intelligence feed: yoroi_suspicious_level1",
+    "yoroi_souspicious_level2_description": "Yoroi threat intelligence feed: yoroi_suspicious_level2",
     "dashboard": {
         "title": "Threat shield",
         "last_blacklist_definitions": "Last threats definitions",
@@ -56,7 +56,10 @@
         "settings_update_successful": "Settings updated successfully",
         "settings_update_failed": "Error while updating settings",
         "cidr_sub": "CIDR Subnet",
-        "host": "Host"
+        "host": "Host",
+        "categories_low": "categories",
+        "select_all_categories": "Select all categories",
+        "deselect_all_categories": "Deselect all categories"
     },
     "analysis": {
         "title": "Analysis",
@@ -68,10 +71,11 @@
         "destination": "Destination",
         "protocol": "Protocol",
         "destination_port": "Destination port",
+        "destination_service": "Destination service",
         "filter": "Search filter",
         "lines": "Max lines",
         "lines_placeholder": "Maximum number of log lines",
-        "logs": "Today logs",
+        "logs": "Recent logs",
         "ip_search_title": "Check IP address",
         "ip_address": "IP address",
         "ip_not_blocked": "is not blocked by Threat shield",

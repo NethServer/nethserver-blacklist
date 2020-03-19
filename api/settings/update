@@ -39,7 +39,7 @@ if [ "$status" = "enabled" ]; then
         invalid_error
     fi
 else
-    /sbin/e-smith/config setprop blacklist BlackListStatus "$status"
+    /sbin/e-smith/config setprop blacklist status "$status"
 
     if [ $? -gt 0 ]; then
         invalid_error

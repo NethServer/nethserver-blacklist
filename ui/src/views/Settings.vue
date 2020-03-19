@@ -69,7 +69,7 @@
           <label class="col-sm-2 control-label">{{$t('settings.whitelist')}}</label>
           <div class="col-sm-5">
             <div id="pf-list-standard" class="list-group list-view-pf list-view-pf-view whitelist">
-              <div v-for="item in config.whitelist" v-bind:key="item.name" class="list-group-item">
+              <div v-for="item in config.whitelist" class="list-group-item">
                 <div class="list-view-pf-actions whitelist-button-c">
                   <button
                     type="button"
@@ -82,7 +82,7 @@
                   <div class="list-view-pf-body">
                     <div class="list-view-pf-description">
                       <div class="list-group-item-text whitelist-elem">
-                        <span>
+                        <span v-if="item">
                           {{item.name}}
                           <span
                             v-show="item.IpAddress || item.Address"
@@ -160,6 +160,26 @@
       </form>
     </div>
     <!-- categories -->
+    <div class="right">
+      <button
+        class="btn btn-default mg-right-md"
+        type="button"
+        @click="toggleSelectionAllCategories()"
+        :disabled="!config.status"
+      >{{$t(selectedCategories < allCategories.length ? 'settings.select_all_categories' : 'settings.deselect_all_categories')}}</button>
+      <button
+        class="btn btn-primary mg-right-xs"
+        type="button"
+        :disabled="selectedCategories == 0 || !config.status"
+        @click="enableCategories()"
+      >{{$t('enable')}} {{ selectedCategories }} {{$t('settings.categories_low')}}</button>
+      <button
+        class="btn btn-danger"
+        type="button"
+        :disabled="selectedCategories == 0 || !config.status"
+        @click="disableCategories()"
+      >{{$t('disable')}} {{ selectedCategories }} {{$t('settings.categories_low')}}</button>
+    </div>
     <h3>{{$t('settings.categories')}}</h3>
     <div v-show="!isLoaded.categories" class="spinner form-spinner-loader mg-left-sm"></div>
     <div v-show="isLoaded.categories">
@@ -173,7 +193,7 @@
             initialSortBy: {field: 'confidence', type: 'desc'}
           }"
           :globalSearch="false"
-          :paginate="false"
+          :paginate="true"
           styleClass="table condensed"
           :nextText="tableLangsTexts.nextText"
           :prevText="tableLangsTexts.prevText"
@@ -182,40 +202,47 @@
           :ofText="tableLangsTexts.ofText"
         >
           <template slot="table-row" slot-scope="props">
-            <td :class="['fancy', {'gray': !props.row.selected}]">
-              <span :title="$t(props.row.selected ? 'enabled' : 'disabled')">
-                <span
-                  :class="['category-status-icon', 'pficon', props.row.selected ? ['pficon-ok', 'green'] : 'pficon-off']"
-                ></span>
-              </span>
+            <!-- selection checkbox -->
+            <td class="fancy">
+              <input
+                type="checkbox"
+                v-model="props.row.selected"
+                @change="toggleSelectCategory(props.row)"
+                class="form-control"
+                :disabled="!config.status"
+              />
+            </td>
+            <!-- name -->
+            <td :class="['fancy', {'gray': !props.row.enabled}]">
               <span :title="$t(props.row.id + '_description')">
                 <span class="semi-bold">{{$t(props.row.id)}}</span>
               </span>
             </td>
-            <td :class="['fancy', {'gray': !props.row.selected}]">
+            <!-- enabled -->
+            <td :class="['fancy', {'gray': !props.row.enabled}]">
+              <span :title="$t(props.row.enabled ? 'enabled' : 'disabled')">
+                <span
+                  :class="['category-status-icon', 'pficon', props.row.enabled ? ['pficon-ok', 'green'] : 'pficon-off']"
+                ></span>
+              </span>
+            </td>
+            <!-- confidence -->
+            <td :class="['fancy', {'gray': !props.row.enabled}]">
               <span
-                :class="['confidence', props.row.selected ? (props.row.confidence > 6 ? 'green' : 'orange') : 'gray']"
+                :class="['confidence', props.row.enabled ? (props.row.confidence > 6 ? 'green' : 'orange') : 'gray']"
               >
                 <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
                 <span v-else>{{ $t('unknown') }}</span>
               </span>
             </td>
-            <td :class="['fancy', {'gray': !props.row.selected}]">{{props.row.type | capitalize}}</td>
-            <td :class="['fancy', {'gray': !props.row.selected}]">{{props.row.maintainer}}</td>
-            <td :class="['fancy', {'gray': !props.row.selected}]">
-              <button
-                v-show="props.row.selected"
-                @click="toggleCategory(props.row, false)"
-                class="btn btn-danger"
-                :disabled="!config.status || isLoading.toggleCategory[props.row.id]"
-              >{{$t('disable')}}</button>
-              <button
-                v-show="!props.row.selected"
-                @click="toggleCategory(props.row, true)"
-                class="btn btn-primary"
-                :disabled="!config.status || isLoading.toggleCategory[props.row.id]"
-              >{{$t('enable')}}</button>
-            </td>
+            <!-- type -->
+            <td
+              :class="['fancy', {'gray': !props.row.enabled}]"
+            >{{(props.row.type ? props.row.type : '-') | capitalize}}</td>
+            <!-- maintainer -->
+            <td
+              :class="['fancy', {'gray': !props.row.enabled}]"
+            >{{props.row.maintainer ? props.row.maintainer : '-'}}</td>
           </template>
         </vue-good-table>
       </div>
@@ -237,9 +264,6 @@ export default {
         categories: false,
         save: true
       },
-      isLoading: {
-        toggleCategory: []
-      },
       config: {
         status: false,
         url: "",
@@ -249,11 +273,20 @@ export default {
       },
       firewallUiInstalled: false,
       allCategories: [],
-      selectedCategories: [],
       columns: [
+        {
+          label: "",
+          sortable: false,
+          type: "boolean"
+        },
         {
           label: this.$i18n.t("settings.name"),
           field: "name",
+          sortable: true
+        },
+        {
+          label: this.$i18n.t("status"),
+          field: "enabled",
           sortable: true
         },
         {
@@ -271,11 +304,6 @@ export default {
           label: this.$i18n.t("settings.maintainer"),
           field: "maintainer",
           sortable: true
-        },
-        {
-          label: this.$i18n.t("actions"),
-          field: "",
-          sortable: false
         }
       ],
       tableLangsTexts: this.tableLangs(),
@@ -296,6 +324,11 @@ export default {
       hosts: [],
       cidrSubs: []
     };
+  },
+  computed: {
+    selectedCategories: function() {
+      return this.allCategories.filter(category => category.selected).length;
+    }
   },
   methods: {
     showErrorMessage(errorMessage, error) {
@@ -408,20 +441,23 @@ export default {
         function(success) {
           try {
             success = JSON.parse(success);
-            context.allCategories = success.categories;
-            context.allCategories.forEach(category => {
+            let categories = success.categories;
+
+            categories.forEach(category => {
+              category.enabled = false;
               category.selected = false;
             });
 
-            for (var selectedCategory of context.config.categories) {
-              var categoryFound = context.allCategories.find(category => {
-                return category.id === selectedCategory;
+            context.config.categories.forEach(enabledCategory => {
+              let categoryFound = categories.find(category => {
+                return category.id === enabledCategory;
               });
 
               if (categoryFound) {
-                categoryFound.selected = true;
+                categoryFound.enabled = true;
               }
-            }
+            });
+            context.allCategories = categories;
             context.isLoaded.categories = true;
           } catch (e) {
             console.error(e);
@@ -454,7 +490,7 @@ export default {
       let categoryIds = [];
 
       for (let category of this.allCategories) {
-        if (category.selected) {
+        if (category.enabled) {
           categoryIds.push(category.id);
         }
       }
@@ -503,19 +539,16 @@ export default {
         },
         function(success) {
           context.isLoaded.save = true;
-          context.isLoading.toggleCategory = [];
           context.getBlacklistData();
         },
         function(error) {
           console.error(error);
           context.isLoaded.save = true;
-          context.isLoading.toggleCategory = [];
         }
       );
     },
     validationError(error, data) {
       this.isLoaded.save = true;
-      this.isLoading.toggleCategory = [];
       const errorData = JSON.parse(data);
 
       for (const e in errorData.attributes) {
@@ -668,13 +701,39 @@ export default {
         return item.name !== itemToDelete.name;
       });
     },
-    toggleCategory(toggledCategory, selected) {
-      this.isLoading.toggleCategory[toggledCategory.id] = true;
-      toggledCategory.selected = selected;
+    toggleSelectCategory(toggledCategory) {
       let categoryFound = this.allCategories.find(category => {
         return toggledCategory.id === category.id;
       });
-      categoryFound.selected = selected;
+      categoryFound.selected = !categoryFound.selected;
+    },
+    toggleSelectionAllCategories() {
+      if (this.selectedCategories < this.allCategories.length) {
+        // select all categories
+        this.allCategories.forEach(category => {
+          category.selected = true;
+        });
+      } else {
+        // deselect all categories
+        this.allCategories.forEach(category => {
+          category.selected = false;
+        });
+      }
+    },
+    enableCategories() {
+      this.allCategories.forEach(category => {
+        if (category.selected) {
+          category.enabled = true;
+        }
+      });
+      this.saveSettings(false);
+    },
+    disableCategories() {
+      this.allCategories.forEach(category => {
+        if (category.selected) {
+          category.enabled = false;
+        }
+      });
       this.saveSettings(false);
     }
   }

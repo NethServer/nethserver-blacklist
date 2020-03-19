@@ -29,7 +29,7 @@
       <div :class="['form-group', {'has-error': error.ipSearch}]">
         <label class="col-sm-2 control-label" for="ip-search">
           {{$t('analysis.ip_address')}}
-          <doc-info :placement="'top'" :chapter="'search_ip_address'" :inline="true"></doc-info>
+          <doc-info :placement="'bottom'" :chapter="'search_ip_address'" :inline="true"></doc-info>
         </label>
         <div class="col-sm-3">
           <input type="text" v-model="ipSearch" id="ip-search" ref="ipSearch" class="form-control" />
@@ -39,7 +39,7 @@
           >{{$t('validation.ip_search_' + error.ipSearch)}}</span>
         </div>
       </div>
-      <!-- search button -->
+      <!-- check button -->
       <div class="form-group">
         <label class="col-sm-2 control-label label-loader">
           <div
@@ -84,7 +84,7 @@
             v-model="lines"
             id="lines"
             min="1"
-            max="9999"
+            max="10000"
             class="form-control"
             :placeholder="$t('analysis.lines_placeholder')"
           />
@@ -135,12 +135,10 @@
               <span>{{props.row.protocol}}</span>
             </td>
             <td class="fancy">
-              <span>
-                {{props.row.dest_port}}
-                <span
-                  v-if="props.row.dest_service"
-                >({{props.row.dest_service}})</span>
-              </span>
+              <span>{{props.row.dest_port}}</span>
+            </td>
+            <td class="fancy">
+              <span>{{props.row.dest_service ? props.row.dest_service : '-'}}</span>
             </td>
           </template>
         </vue-good-table>
@@ -199,6 +197,11 @@ export default {
           field: "dest_port",
           sortable: true,
           type: "number"
+        },
+        {
+          label: this.$i18n.t("analysis.destination_service"),
+          field: "dest_service",
+          sortable: true
         }
       ],
       error: {
@@ -213,7 +216,8 @@ export default {
   },
   methods: {
     getLogs() {
-      var context = this;
+      this.isLoaded.logs = false;
+      const context = this;
       nethserver.exec(
         ["nethserver-blacklist/analysis/read"],
         {
