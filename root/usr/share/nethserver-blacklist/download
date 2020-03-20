@@ -94,14 +94,12 @@ else
     opts="--git-dir=$DEST_DIR/.git --work-tree=$DEST_DIR"
     debug "Pulling changes"
 
-    git_output=$(git $opts pull -f origin master 2>/dev/null)
+    git $opts fetch --all &>/dev/null
     if [ $? -gt 0 ]; then
-        exit_error "Can't update blacklist repository"
+        exit_error "Can't update blacklist repository: fetch failed"
     fi
-
-    # Reload ipset if repository has been changed
-    echo $git_output | grep -q 'Already up to date'
-    if [ $? -gt 0 ]; then
+    git $opts reset --hard origin/master &>/dev/null
+    if [ $? -eq 0 ]; then
         debug_flag=""
         if [ $DEBUG -eq 1 ]; then
             debug_flag="-d"
@@ -109,6 +107,6 @@ else
         debug "Repository have been updated: reloading ipset"
         exec /usr/share/nethserver-blacklist/load-ipsets --reload $debug_flag
     else
-        debug "Repository already up to date"
+        debug "Can't update blacklist repository: hard reset failed"
     fi
 fi
