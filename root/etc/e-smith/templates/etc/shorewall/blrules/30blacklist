@@ -48,7 +48,7 @@
         # Enable selected blacklist categories
         my @lists = split(/,/, $blacklist{'Categories'});
         # remove extension part, add 'bl-' prefix
-        @lists = map { "bl-$_"  } @lists;
+        @lists = map { substr("bl-$_", 0, 31)  } @lists;
 
         foreach my $name (@lists) {
             # green interface

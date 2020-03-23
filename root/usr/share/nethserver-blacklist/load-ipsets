@@ -95,7 +95,7 @@ for l in $LISTS; do
     type=''
     file_netset="$BLDIR/$l".netset
     file_ipset="$BLDIR/$l".ipset
-    name="bl-$l"
+    name=$(echo "bl-$l" | cut -c 1-31) # limit to 31 chars
     if [ -f $file_netset ]; then
         file=$file_netset
         type="hash:net"
