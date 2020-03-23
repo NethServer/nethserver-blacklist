@@ -166,19 +166,19 @@
         type="button"
         @click="toggleSelectionAllCategories()"
         :disabled="!config.status"
-      >{{$t(selectedCategories < allCategories.length ? 'settings.select_all_categories' : 'settings.deselect_all_categories')}}</button>
+      >{{$t(selectedCategories.length < allCategories.length ? 'settings.select_all_categories' : 'settings.deselect_all_categories')}}</button>
       <button
         class="btn btn-primary mg-right-xs"
         type="button"
-        :disabled="selectedCategories == 0 || !config.status"
+        :disabled="selectedCategories.length == 0 || disabledSelectedCategories.length == 0 || !config.status"
         @click="enableCategories()"
-      >{{$t('enable')}} {{ selectedCategories }} {{$t('settings.categories_low')}}</button>
+      >{{$t('enable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
       <button
         class="btn btn-danger"
         type="button"
-        :disabled="selectedCategories == 0 || !config.status"
+        :disabled="selectedCategories.length == 0 || enabledSelectedCategories.length == 0 || !config.status"
         @click="disableCategories()"
-      >{{$t('disable')}} {{ selectedCategories }} {{$t('settings.categories_low')}}</button>
+      >{{$t('disable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
     </div>
     <h3>{{$t('settings.categories')}}</h3>
     <div v-show="!isLoaded.categories" class="spinner form-spinner-loader mg-left-sm"></div>
@@ -200,49 +200,65 @@
           :rowsPerPageText="tableLangsTexts.rowsPerPageText"
           :globalSearchPlaceholder="tableLangsTexts.globalSearchPlaceholder"
           :ofText="tableLangsTexts.ofText"
+          :row-style-class="rowStyleClassFn"
         >
           <template slot="table-row" slot-scope="props">
             <!-- selection checkbox -->
             <td class="fancy">
-              <input
-                type="checkbox"
-                v-model="props.row.selected"
-                @change="toggleSelectCategory(props.row)"
-                class="form-control"
-                :disabled="!config.status"
-              />
+              <label :for="'checkbox_' + props.row.id" class="full-size">
+                <input
+                  type="checkbox"
+                  v-model="props.row.selected"
+                  :id="'checkbox_' + props.row.id"
+                  @change="toggleSelectCategory(props.row)"
+                  class="form-control"
+                  :disabled="!config.status"
+                />
+              </label>
             </td>
             <!-- name -->
             <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <span :title="$t(props.row.id + '_description')">
-                <span class="semi-bold">{{$t(props.row.id)}}</span>
-              </span>
+              <label :for="'checkbox_' + props.row.id" class="full-size">
+                <span :title="$t(props.row.id + '_description')">
+                  <span class="semi-bold">{{$t(props.row.id)}}</span>
+                </span>
+              </label>
             </td>
             <!-- enabled -->
             <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <span :title="$t(props.row.enabled ? 'enabled' : 'disabled')">
-                <span
-                  :class="['category-status-icon', 'pficon', props.row.enabled ? ['pficon-ok', 'green'] : 'pficon-off']"
-                ></span>
-              </span>
+              <label :for="'checkbox_' + props.row.id" class="full-size">
+                <span :title="$t(props.row.enabled ? 'enabled' : 'disabled')">
+                  <span
+                    :class="['category-status-icon', 'pficon', props.row.enabled ? ['pficon-ok', 'green'] : 'pficon-off']"
+                  ></span>
+                </span>
+              </label>
             </td>
             <!-- confidence -->
             <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <span
-                :class="['confidence', props.row.enabled ? (props.row.confidence > 6 ? 'green' : 'orange') : 'gray']"
-              >
-                <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
-                <span v-else>{{ $t('unknown') }}</span>
-              </span>
+              <label :for="'checkbox_' + props.row.id" class="full-size">
+                <span
+                  :class="['confidence', props.row.enabled ? (props.row.confidence > 6 ? 'green' : 'orange') : 'gray']"
+                >
+                  <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
+                  <span v-else>{{ $t('unknown') }}</span>
+                </span>
+              </label>
             </td>
             <!-- type -->
-            <td
-              :class="['fancy', {'gray': !props.row.enabled}]"
-            >{{(props.row.type ? props.row.type : '-') | capitalize}}</td>
+            <td :class="['fancy', {'gray': !props.row.enabled}]">
+              <label
+                :for="'checkbox_' + props.row.id"
+                class="full-size"
+              >{{(props.row.type ? props.row.type : '-') | capitalize}}</label>
+            </td>
             <!-- maintainer -->
-            <td
-              :class="['fancy', {'gray': !props.row.enabled}]"
-            >{{props.row.maintainer ? props.row.maintainer : '-'}}</td>
+            <td :class="['fancy', {'gray': !props.row.enabled}]">
+              <label
+                :for="'checkbox_' + props.row.id"
+                class="full-size"
+              >{{props.row.maintainer ? props.row.maintainer : '-'}}</label>
+            </td>
           </template>
         </vue-good-table>
       </div>
@@ -327,7 +343,13 @@ export default {
   },
   computed: {
     selectedCategories: function() {
-      return this.allCategories.filter(category => category.selected).length;
+      return this.allCategories.filter(category => category.selected);
+    },
+    enabledSelectedCategories: function() {
+      return this.selectedCategories.filter(category => category.enabled);
+    },
+    disabledSelectedCategories: function() {
+      return this.selectedCategories.filter(category => !category.enabled);
     }
   },
   methods: {
@@ -708,7 +730,7 @@ export default {
       categoryFound.selected = !categoryFound.selected;
     },
     toggleSelectionAllCategories() {
-      if (this.selectedCategories < this.allCategories.length) {
+      if (this.selectedCategories.length < this.allCategories.length) {
         // select all categories
         this.allCategories.forEach(category => {
           category.selected = true;
@@ -735,6 +757,9 @@ export default {
         }
       });
       this.saveSettings(false);
+    },
+    rowStyleClassFn(row) {
+      return row.selected ? "active" : "";
     }
   }
 };
