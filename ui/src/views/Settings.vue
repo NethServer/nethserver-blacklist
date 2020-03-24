@@ -165,18 +165,18 @@
         class="btn btn-default mg-right-md"
         type="button"
         @click="toggleSelectionAllCategories()"
-        :disabled="!config.status"
+        :disabled="!config.status || !isLoaded.categories"
       >{{$t(selectedCategories.length < allCategories.length ? 'settings.select_all_categories' : 'settings.deselect_all_categories')}}</button>
       <button
         class="btn btn-primary mg-right-xs"
         type="button"
-        :disabled="selectedCategories.length == 0 || disabledSelectedCategories.length == 0 || !config.status"
+        :disabled="selectedCategories.length == 0 || disabledSelectedCategories.length == 0 || !isLoaded.categories || !config.status"
         @click="enableCategories()"
       >{{$t('enable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
       <button
         class="btn btn-danger"
         type="button"
-        :disabled="selectedCategories.length == 0 || enabledSelectedCategories.length == 0 || !config.status"
+        :disabled="selectedCategories.length == 0 || enabledSelectedCategories.length == 0 || !isLoaded.categories || !config.status"
         @click="disableCategories()"
       >{{$t('disable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
     </div>
@@ -522,6 +522,7 @@ export default {
       if (saveButtonLoader) {
         this.isLoaded.save = false;
       }
+      this.isLoaded.categories = false;
       this.error.url = null;
       this.error.whitelist = null;
 
@@ -561,16 +562,19 @@ export default {
         },
         function(success) {
           context.isLoaded.save = true;
+          context.isLoaded.categories = true;
           context.getBlacklistData();
         },
         function(error) {
           console.error(error);
           context.isLoaded.save = true;
+          context.isLoaded.categories = true;
         }
       );
     },
     validationError(error, data) {
       this.isLoaded.save = true;
+      this.isLoaded.categories = true;
       const errorData = JSON.parse(data);
 
       for (const e in errorData.attributes) {
