@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.0.1
+Version: 1.0.2
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -53,6 +53,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Thu Apr 09 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.2-1
+- Threat shield: check IP address by clicking on recent logs entries - NethServer/dev#6123
+
 * Wed Apr 01 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.1-1
 - Blacklist: systemd logs ignoring a conf - Bug NethServer/dev#6104
 
