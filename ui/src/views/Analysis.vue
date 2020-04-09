@@ -126,10 +126,22 @@
               <span>{{props.row.interface}}</span>
             </td>
             <td class="fancy">
-              <span>{{props.row.source}}</span>
+              <span
+                data-toggle="tooltip"
+                data-placement="top"
+                :title="$t('analysis.ip_search_title')"
+              >
+                <a @click="ipAddressClicked(props.row.source)">{{props.row.source}}</a>
+              </span>
             </td>
             <td class="fancy">
-              <span>{{props.row.dest}}</span>
+              <span
+                data-toggle="tooltip"
+                data-placement="top"
+                :title="$t('analysis.ip_search_title')"
+              >
+                <a @click="ipAddressClicked(props.row.dest)">{{props.row.dest}}</a>
+              </span>
             </td>
             <td class="fancy">
               <span>{{props.row.protocol}}</span>
@@ -230,10 +242,12 @@ export default {
           success = JSON.parse(success);
           context.logs = success.logs;
           context.isLoaded.logs = true;
+          context.updateTooltips();
         },
         function(error) {
           console.error(error);
           context.isLoaded.logs = true;
+          context.updateTooltips();
         },
         true
       );
@@ -275,6 +289,16 @@ export default {
           this.$refs.ipSearch.focus();
         }
       }
+    },
+    updateTooltips() {
+      setTimeout(() => {
+        $('[data-toggle="tooltip"]').tooltip();
+      }, 300);
+    },
+    ipAddressClicked(ipAddress) {
+      window.scrollTo(0,0);
+      this.ipSearch = ipAddress;
+      this.validateSearchIp();
     },
     searchIp(validateObj) {
       var context = this;
