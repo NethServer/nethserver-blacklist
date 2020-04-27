@@ -292,8 +292,7 @@ export default {
       columns: [
         {
           label: "",
-          sortable: false,
-          type: "boolean"
+          sortable: false
         },
         {
           label: this.$i18n.t("settings.name"),
@@ -302,8 +301,10 @@ export default {
         },
         {
           label: this.$i18n.t("status"),
-          field: "enabled",
-          sortable: true
+          sortable: true,
+          field(rowObj){
+            return rowObj.enabled.toString()
+          }
         },
         {
           label: this.$i18n.t("settings.confidence"),
