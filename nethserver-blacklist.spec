@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -53,6 +53,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Tue Apr 28 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.3-1
+- Threat Shield: cannot sort by category status - NethServer/dev#6140
+
 * Thu Apr 09 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.2-1
 - Threat shield: check IP address by clicking on recent logs entries - NethServer/dev#6123
 
