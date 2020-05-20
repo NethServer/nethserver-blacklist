@@ -11,6 +11,8 @@
     "search": "Search",
     "unknown": "Unknown",
     "status": "Status",
+    "next": "Next",
+    "prev": "Prev",
     "of": "of",
     "rows_per_page": "Rows per page",
     "all": "All",
@@ -59,7 +61,9 @@
         "host": "Host",
         "categories_low": "categories",
         "select_all_categories": "Select all categories",
-        "deselect_all_categories": "Deselect all categories"
+        "deselect_all_categories": "Deselect all categories",
+        "categories_enabled": "categories enabled",
+        "no_category_enabled": "No category enabled"
     },
     "analysis": {
         "title": "Analysis",
