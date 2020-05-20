@@ -161,8 +161,16 @@
     </div>
     <!-- categories -->
     <div class="right">
+      <label class="gray mg-right-md">
+        <span v-if="enabledCategories.length && config.status">
+          {{ enabledCategories.length }} {{$t('settings.categories_enabled')}}
+        </span>
+        <span v-else>
+          {{$t('settings.no_category_enabled')}}
+        </span>
+      </label>
       <button
-        class="btn btn-default mg-right-md"
+        class="btn btn-default mg-right-xs"
         type="button"
         @click="toggleSelectionAllCategories()"
         :disabled="!config.status || !isLoaded.categories"
@@ -190,22 +198,26 @@
           :lineNumbers="false"
           :sort-options="{
             enabled: true,
-            initialSortBy: {field: 'confidence', type: 'desc'}
+            initialSortBy: {field: 'enabled', type: 'desc'},
           }"
-          :globalSearch="false"
-          :paginate="true"
-          styleClass="table condensed"
-          :nextText="tableLangsTexts.nextText"
-          :prevText="tableLangsTexts.prevText"
-          :rowsPerPageText="tableLangsTexts.rowsPerPageText"
-          :globalSearchPlaceholder="tableLangsTexts.globalSearchPlaceholder"
-          :ofText="tableLangsTexts.ofText"
+          :search-options="{
+            enabled: true,
+            placeholder: tableLangsTexts.globalSearchPlaceholder
+          }"
+          :pagination-options="{
+            enabled: true,
+            perPage: tableLangsTexts.rowsPerPageText,
+            nextLabel: tableLangsTexts.nextText,
+            prevLabel: tableLangsTexts.prevText,
+            ofLabel: tableLangsTexts.ofText,
+            dropdownAllowAll: false,
+          }"
+          styleClass="table responsive vgt2"
           :row-style-class="rowStyleClassFn"
         >
           <template slot="table-row" slot-scope="props">
-            <!-- selection checkbox -->
-            <td class="fancy">
-              <label :for="'checkbox_' + props.row.id" class="full-size">
+            <span v-if="props.column.field == 'select'">
+              <label :for="'checkbox_' + props.row.id" class="checkbox-label">
                 <input
                   type="checkbox"
                   v-model="props.row.selected"
@@ -215,50 +227,44 @@
                   :disabled="!config.status"
                 />
               </label>
-            </td>
-            <!-- name -->
-            <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <label :for="'checkbox_' + props.row.id" class="full-size">
+            </span>
+            <span v-else-if="props.column.field == 'name'">
+              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
                 <span :title="$t(props.row.id + '_description')">
                   <span class="semi-bold">{{$t(props.row.id)}}</span>
                 </span>
               </label>
-            </td>
-            <!-- enabled -->
-            <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <label :for="'checkbox_' + props.row.id" class="full-size">
-                <span :title="$t(props.row.enabled ? 'enabled' : 'disabled')">
-                  <span
-                    :class="['category-status-icon', 'pficon', props.row.enabled ? ['pficon-ok', 'green'] : 'pficon-off']"
-                  ></span>
+            </span>
+            <span v-else-if="props.column.field == 'enabled'">
+              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
+                <span
+                  :class="['category-status-icon', 'pficon', (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
+                ></span>
+                <span :class="{'green': (props.row.enabled && config.status)}">
+                  {{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}
                 </span>
               </label>
-            </td>
-            <!-- confidence -->
-            <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <label :for="'checkbox_' + props.row.id" class="full-size">
-                <span
-                  :class="['confidence', props.row.enabled ? (props.row.confidence > 6 ? 'green' : 'orange') : 'gray']"
+            </span>
+            <span v-else-if="props.column.field == 'confidence'">
+              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
+                <span :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
+                  {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)}]"
                 >
                   <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
                   <span v-else>{{ $t('unknown') }}</span>
                 </span>
               </label>
-            </td>
-            <!-- type -->
-            <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <label
-                :for="'checkbox_' + props.row.id"
-                class="full-size"
-              >{{(props.row.type ? props.row.type : '-') | capitalize}}</label>
-            </td>
-            <!-- maintainer -->
-            <td :class="['fancy', {'gray': !props.row.enabled}]">
-              <label
-                :for="'checkbox_' + props.row.id"
-                class="full-size"
-              >{{props.row.maintainer ? props.row.maintainer : '-'}}</label>
-            </td>
+            </span>
+            <span v-else-if="props.column.field == 'type'">
+              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
+                {{(props.row.type ? props.row.type : '-') | capitalize}}
+              </label>
+            </span>
+            <span v-else-if="props.column.field == 'maintainer'">
+              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
+                {{props.row.maintainer ? props.row.maintainer : '-'}}
+              </label>
+            </span>
           </template>
         </vue-good-table>
       </div>
@@ -292,6 +298,7 @@ export default {
       columns: [
         {
           label: "",
+          field: "select",
           sortable: false
         },
         {
@@ -301,10 +308,9 @@ export default {
         },
         {
           label: this.$i18n.t("status"),
-          sortable: true,
-          field(rowObj){
-            return rowObj.enabled.toString()
-          }
+          field: "enabled",
+          type: "boolean",
+          sortable: true
         },
         {
           label: this.$i18n.t("settings.confidence"),
@@ -345,6 +351,9 @@ export default {
   computed: {
     selectedCategories: function() {
       return this.allCategories.filter(category => category.selected);
+    },
+    enabledCategories: function() {
+      return this.allCategories.filter(category => category.enabled);
     },
     enabledSelectedCategories: function() {
       return this.selectedCategories.filter(category => category.enabled);
@@ -784,11 +793,6 @@ export default {
   font-weight: bold;
 }
 
-.full-size {
-  width: 100%;
-  height: 100%;
-}
-
 .confidence {
   font-weight: bold;
 }
@@ -850,5 +854,11 @@ export default {
   font-size: 1.5rem;
   margin-right: 1rem;
   margin-top: 0.3rem;
+}
+
+.checkbox-label {
+  margin: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>
