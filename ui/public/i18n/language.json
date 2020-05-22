@@ -62,8 +62,8 @@
         "categories_low": "categories",
         "select_all_categories": "Select all categories",
         "deselect_all_categories": "Deselect all categories",
-        "categories_enabled": "categories enabled",
-        "no_category_enabled": "No category enabled"
+        "categories_enabled": "enabled categories",
+        "no_category_enabled": "No enabled category"
     },
     "analysis": {
         "title": "Analysis",
