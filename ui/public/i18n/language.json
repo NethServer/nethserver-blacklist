@@ -17,7 +17,7 @@
     "rows_per_page": "Rows per page",
     "all": "All",
     "firehol_level1": "FireHOL level 1",
-    "firehol_level2": "FireHOL level 1",
+    "firehol_level2": "FireHOL level 2",
     "firehol_level1_description": "A firewall blacklist composed from IP lists, providing maximum protection with minimum false positives. Suitable for basic protection on all internet facing servers, routers and firewalls. (includes: dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw)",
     "firehol_level2_description": "An ipset made from blocklists that track attacks, during about the last 48 hours. (includes: blocklist_de dshield_1d greensnow)",
     "nethesis_level3": "Nethesis level 3",
@@ -62,8 +62,8 @@
         "categories_low": "categories",
         "select_all_categories": "Select all categories",
         "deselect_all_categories": "Deselect all categories",
-        "categories_enabled": "categories enabled",
-        "no_category_enabled": "No category enabled"
+        "categories_enabled": "enabled categories",
+        "no_category_enabled": "No enabled category"
     },
     "analysis": {
         "title": "Analysis",
