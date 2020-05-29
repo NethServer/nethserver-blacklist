@@ -109,23 +109,32 @@
           :columns="columns"
           :rows="logs"
           :lineNumbers="false"
-          :globalSearch="false"
-          :paginate="true"
-          styleClass="table condensed"
-          :nextText="$t('analysis.less_recent')"
-          :prevText="$t('analysis.more_recent')"
-          :rowsPerPageText="tableLangsTexts.rowsPerPageText"
-          :globalSearchPlaceholder="tableLangsTexts.globalSearchPlaceholder"
-          :ofText="tableLangsTexts.ofText"
+          :sort-options="{
+            enabled: true,
+            initialSortBy: {field: 'seconds', type: 'desc'},
+          }"
+          :search-options="{
+            enabled: true,
+            placeholder: tableLangsTexts.globalSearchPlaceholder
+          }"
+          :pagination-options="{
+            enabled: true,
+            rowsPerPageLabel: tableLangsTexts.rowsPerPageText,
+            nextLabel: tableLangsTexts.nextText,
+            prevLabel: tableLangsTexts.prevText,
+            ofLabel: tableLangsTexts.ofText,
+            dropdownAllowAll: false,
+          }"
+          styleClass="table condensed responsive vgt2"
         >
           <template slot="table-row" slot-scope="props">
-            <td class="fancy">
+            <span v-if="props.column.field == 'seconds'">
               <span>{{props.row.time}}</span>
-            </td>
-            <td class="fancy">
+            </span>
+            <span v-if="props.column.field == 'interface'">
               <span>{{props.row.interface}}</span>
-            </td>
-            <td class="fancy">
+            </span>
+            <span v-if="props.column.field == 'source'">
               <span
                 data-toggle="tooltip"
                 data-placement="top"
@@ -133,8 +142,8 @@
               >
                 <a @click="ipAddressClicked(props.row.source)">{{props.row.source}}</a>
               </span>
-            </td>
-            <td class="fancy">
+            </span>
+            <span v-if="props.column.field == 'dest'">
               <span
                 data-toggle="tooltip"
                 data-placement="top"
@@ -142,16 +151,16 @@
               >
                 <a @click="ipAddressClicked(props.row.dest)">{{props.row.dest}}</a>
               </span>
-            </td>
-            <td class="fancy">
+            </span>
+            <span v-if="props.column.field == 'protocol'">
               <span>{{props.row.protocol}}</span>
-            </td>
-            <td class="fancy">
+            </span>
+            <span v-if="props.column.field == 'dest_port'">
               <span>{{props.row.dest_port}}</span>
-            </td>
-            <td class="fancy">
+            </span>
+            <span v-if="props.column.field == 'dest_service'">
               <span>{{props.row.dest_service ? props.row.dest_service : '-'}}</span>
-            </td>
+            </span>
           </template>
         </vue-good-table>
       </div>

@@ -206,7 +206,7 @@
           }"
           :pagination-options="{
             enabled: true,
-            perPage: tableLangsTexts.rowsPerPageText,
+            rowsPerPageLabel: tableLangsTexts.rowsPerPageText,
             nextLabel: tableLangsTexts.nextText,
             prevLabel: tableLangsTexts.prevText,
             ofLabel: tableLangsTexts.ofText,
