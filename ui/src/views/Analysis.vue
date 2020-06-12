@@ -114,8 +114,7 @@
             initialSortBy: {field: 'seconds', type: 'desc'},
           }"
           :search-options="{
-            enabled: true,
-            placeholder: tableLangsTexts.globalSearchPlaceholder
+            enabled: false,
           }"
           :pagination-options="{
             enabled: true,

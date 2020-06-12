@@ -2,7 +2,7 @@
     "id": "nethserver-blacklist",
     "name": "Threat shield",
     "summary": "Threat shield",
-    "description": "Nethserver blacklist based on IPSet",
+    "description": "NethServer blacklist based on IPSet",
     "url": "",
     "homepage": "https://github.com/NethServer/nethserver-blacklist",
     "provides": ["nethserver-blacklist"],

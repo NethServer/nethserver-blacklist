@@ -230,7 +230,7 @@
             </span>
             <span v-else-if="props.column.field == 'name'">
               <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                <span :title="$t(props.row.id + '_description')">
+                <span :title="$te(props.row.id + '_description') ? $t(props.row.id + '_description') : ''">
                   <span class="semi-bold">{{$t(props.row.id)}}</span>
                 </span>
               </label>
