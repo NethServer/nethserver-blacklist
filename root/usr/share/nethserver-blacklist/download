@@ -82,7 +82,7 @@ fi
 # Create repository clone
 if [ ! -d "$DEST_DIR/.git" ]; then
     debug "Cloning repository"
-    git clone $quiet $proto$auth$url $DEST_DIR
+    git clone --depth 1 $quiet $proto$auth$url $DEST_DIR
     if [ $? -gt 0 ]; then
         exit_error "Can't download blacklist repository"
     fi
