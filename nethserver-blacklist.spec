@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.0.6
+Version: 1.0.7
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -53,6 +53,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Tue Jun 16 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.7-1
+- Threat shield: improve first download time - NethServer/dev#6207
+
 * Mon Jun 15 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.0.6-1
 - Firewall: Prevent object deletion if used in Threat Shield whitelist - Bug NethServer/dev#6196
 
