@@ -11,6 +11,7 @@ BuildArch: noarch
 
 Requires: git
 Requires: nethserver-firewall-base
+Requires: pihole-ftl
 
 BuildRequires: nethserver-devtools
 
