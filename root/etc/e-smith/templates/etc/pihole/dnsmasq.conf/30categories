@@ -1,0 +1,15 @@
+#
+# 30categories
+#
+{
+    my $categories = $ftl{'Categories'} || '';
+    my $status = $ftl{'status'} || 'disabled';
+    if ($status eq 'enabled') {
+        foreach(split(/,/,$categories)) {
+            my $file = "/usr/share/blacklist/$_.dns";
+            if(-f $file) {
+                $OUT.="addn-hosts=$file\n";
+            }
+        }
+    }
+}

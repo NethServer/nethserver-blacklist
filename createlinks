@@ -33,6 +33,10 @@ event_templates($event,
 
 event_actions($event, 'initialize-default-databases' => '00');
 
+event_services($event, qw(
+    ftl restart
+));
+
 
 #--------------------------------------------------
 # actions for nethserver-blacklist-save event
@@ -41,11 +45,16 @@ event_actions($event, 'initialize-default-databases' => '00');
 $event = "nethserver-blacklist-save";
 event_templates($event,
     "/etc/cron.d/nethserver-blacklist"
+    "/etc/pihole/dnsmasq.conf"
 );
 
 event_actions($event, qw(
    nethserver-blacklist-conf 20
    firewall-adjust 30
+));
+
+event_services($event, qw(
+    ftl restart
 ));
 
 validator_actions($_, qw(
