@@ -71,7 +71,9 @@
     <div v-if="isLoaded.stats">
       <div>
         <div class="stats-container card-pf-utilization-details">
-          <span class="card-pf-utilization-card-details-count">{{ stats.totalHits }}</span>
+          <span class="card-pf-utilization-card-details-count" :title="stats.totalHits">
+            {{ stats.totalHits | humanFormat }}
+          </span>
           <span class="card-pf-utilization-card-details-description">
             <span
               class="card-pf-utilization-card-details-line-2 stats-text"
