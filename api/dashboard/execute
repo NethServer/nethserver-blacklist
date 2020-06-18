@@ -26,7 +26,12 @@
 
 . /usr/libexec/nethserver/api/lib/helper_functions
 
-/usr/share/nethserver-blacklist/download
+# read json from stdin
+data=$(cat /dev/stdin)
+
+type=$(echo $data | jq -r '.type')
+
+/usr/share/nethserver-blacklist/download $type
 
 if [ $? -gt 0 ]; then
     error "BlacklistDownloadFailed" "See /var/log/messages"

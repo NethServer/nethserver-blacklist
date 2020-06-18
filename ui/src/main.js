@@ -30,7 +30,8 @@ import VueSuggestions from 'v-suggestions';
 
 import App from './App.vue'
 import Dashboard from './views/Dashboard.vue'
-import Settings from './views/Settings.vue'
+import IpBlacklist from './views/IpBlacklist.vue'
+import DnsBlacklist from './views/DnsBlacklist.vue'
 import Analysis from './views/Analysis.vue'
 import Logs from './views/Logs.vue'
 import About from './views/About.vue'
@@ -59,7 +60,8 @@ const router = new Router({
     routes: [
       { path: '/', redirect: '/dashboard'},
       { path: '/dashboard', component: Dashboard },
-      { path: '/settings', component: Settings },
+      { path: '/ip_blacklist', component: IpBlacklist },
+      { path: '/dns_blacklist', component: DnsBlacklist },
       { path: '/analysis', component: Analysis },
       { path: '/logs', component: Logs },
       { path: '/about', name: 'about', component: About },

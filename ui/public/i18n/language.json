@@ -16,24 +16,13 @@
     "of": "of",
     "rows_per_page": "Rows per page",
     "all": "All",
-    "firehol_level1": "FireHOL level 1",
-    "firehol_level2": "FireHOL level 2",
-    "firehol_level1_description": "A firewall blacklist composed from IP lists, providing maximum protection with minimum false positives. Suitable for basic protection on all internet facing servers, routers and firewalls. (includes: dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw)",
-    "firehol_level2_description": "An ipset made from blocklists that track attacks, during about the last 48 hours. (includes: blocklist_de dshield_1d greensnow)",
-    "nethesis_level3": "Nethesis level 3",
-    "yoroi_malware_level1": "Yoroi malware level 1",
-    "yoroi_malware_level2": "Yoroi malware level 2",
-    "yoroi_souspicious_level1": "Yoroi suspicious level 1",
-    "yoroi_souspicious_level2": "Yoroi suspicious level 2",
-    "nethesis_level3_description": "Nethesis threat intelligence feed",
-    "yoroi_malware_level1_description": "Yoroi threat intelligence feed: yoroi_malware_level1",
-    "yoroi_malware_level2_description": "Yoroi threat intelligence feed: yoroi_malware_level2",
-    "yoroi_souspicious_level1_description": "Yoroi threat intelligence feed: yoroi_suspicious_level1",
-    "yoroi_souspicious_level2_description": "Yoroi threat intelligence feed: yoroi_suspicious_level2",
     "dashboard": {
         "title": "Threat shield",
         "last_blacklist_definitions": "Last threats definitions",
-        "statistics": "Statistics",
+        "ip_blacklist": "IP blacklist",
+        "dns_blacklist": "DNS blacklist",
+        "ip_statistics": "IP blacklist statistics",
+        "dns_statistics": "DNS blacklist statistics",
         "today_total_threats_blocked": "threats blocked today",
         "today_most_blocked_source_hosts": "Today most blocked source hosts",
         "today_most_blocked_destination_hosts": "Today most blocked destination hosts",
@@ -41,11 +30,17 @@
         "blacklist_update_successful": "Threat shield is up to date",
         "blacklist_update_failed": "Error while updating threats definitions",
         "no_data": "No data",
-        "blacklist_enabled": "Threat shield enabled",
-        "blacklist_disabled": "Threat shield disabled"
+        "ip_blacklist_enabled": "IP blacklist is enabled",
+        "ip_blacklist_disabled": "IP blacklist is disabled",
+        "dns_blacklist_enabled": "DNS blacklist is enabled",
+        "dns_blacklist_disabled": "DNS blacklist is disabled",
+        "top_clients": "Most active clients",
+        "top_blocked_domains": "Most blocked domains",
+        "top_domains": "Most requested domains",
+        "today_threats_percentage": "threats ratio",
+        "today_dns_queries": "DNS queries today"
     },
     "settings": {
-        "title": "Settings",
         "download_url": "Download URL",
         "categories": "Categories",
         "name": "Name",
@@ -64,6 +59,35 @@
         "deselect_all_categories": "Deselect all categories",
         "categories_enabled": "enabled categories",
         "no_category_enabled": "No enabled category"
+    },
+    "categories": {
+        "firehol_level1": "FireHOL level 1",
+        "firehol_level2": "FireHOL level 2",
+        "firehol_level1_description": "A firewall blacklist composed from IP lists, providing maximum protection with minimum false positives. Suitable for basic protection on all internet facing servers, routers and firewalls. (includes: dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw)",
+        "firehol_level2_description": "An ipset made from blocklists that track attacks, during about the last 48 hours. (includes: blocklist_de dshield_1d greensnow)",
+        "nethesis_level3": "Nethesis level 3",
+        "yoroi_malware_level1": "Yoroi malware level 1",
+        "yoroi_malware_level2": "Yoroi malware level 2",
+        "yoroi_souspicious_level1": "Yoroi suspicious level 1",
+        "yoroi_souspicious_level2": "Yoroi suspicious level 2",
+        "yoroi_suspicious_level1": "Yoroi suspicious level 1",
+        "yoroi_suspicious_level2": "Yoroi suspicious level 2",
+        "nethesis_level3_description": "Nethesis threat intelligence feed",
+        "yoroi_malware_level1_description": "Yoroi threat intelligence feed: yoroi_malware_level1",
+        "yoroi_malware_level2_description": "Yoroi threat intelligence feed: yoroi_malware_level2",
+        "yoroi_souspicious_level1_description": "Yoroi threat intelligence feed: yoroi_suspicious_level1",
+        "yoroi_souspicious_level2_description": "Yoroi threat intelligence feed: yoroi_suspicious_level2",
+        "yoroi_suspicious_level1_description": "Yoroi threat intelligence feed: yoroi_suspicious_level1",
+        "yoroi_suspicious_level2_description": "Yoroi threat intelligence feed: yoroi_suspicious_level2"
+    },
+    "ip_blacklist": {
+        "title": "IP blacklist",
+        "enable_ip_blacklist": "Enable IP blacklist"
+    },
+    "dns_blacklist": {
+        "title": "DNS blacklist",
+        "enable_dns_blacklist": "Enable DNS blacklist",
+        "zones": "Zones"
     },
     "analysis": {
         "title": "Analysis",
@@ -112,7 +136,7 @@
         "ip_search_invalid": "Invalid IP address"
     },
     "docs": {
-        "blacklist_download_url": "This is where threats (blacklist) definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists",
+        "blacklist_download_url": "This is where threats definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists",
         "search_ip_address": "Check if this IP address is blocked by Threat shield blacklist"
     }
 }

@@ -138,6 +138,13 @@ var Filters = {
             return '-'
         }
         return value.length > 0 ? value.split(',').join('\n') : '-'
+    },
+    decimalsFormat: function (value, decimalPlaces = 2) {
+        if (value === null || value === "" || isNaN(value)) {
+            return "-";
+        }
+
+        return Math.round(value * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
     }
 };
 

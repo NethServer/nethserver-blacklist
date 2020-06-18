@@ -342,7 +342,7 @@ export default {
       const context = this;
       context.isLoaded.categories = false;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/ipsets/read"],
         {
           action: "categories"
         },

@@ -22,7 +22,7 @@
 
 <template>
   <div>
-    <h2>{{$t('settings.title')}}</h2>
+    <h2 class="mg-bottom-md">{{$t('dns_blacklist.title')}}</h2>
     <!-- error message -->
     <div v-if="errorMessage" class="alert alert-danger alert-dismissable">
       <button type="button" class="close" @click="closeErrorMessage()" aria-label="Close">
@@ -36,7 +36,10 @@
       <form class="form-horizontal" v-on:submit.prevent="saveSettings(true)">
         <!-- status -->
         <div class="form-group">
-          <label class="col-sm-2 control-label" for="blacklist-status">{{$t('enabled')}}</label>
+          <label
+            class="col-sm-2 control-label"
+            for="blacklist-status"
+          >{{$t('dns_blacklist.enable_dns_blacklist')}}</label>
           <div class="col-sm-2">
             <input
               type="checkbox"
@@ -64,6 +67,49 @@
             <span v-if="error.url" class="help-block">{{$t('validation.url_' + error.url)}}</span>
           </div>
         </div>
+        <!-- roles -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label pad-top-xs">{{$t('dns_blacklist.zones')}}</label>
+          <div class="col-sm-5">
+            <div id="pf-list-standard" class="list-group list-view-pf roles-list">
+              <div v-for="(roleSelected, role) in roles" class="list-group-item">
+                <input
+                  type="checkbox"
+                  v-model="roles[role]"
+                  :id="'ck-' + role"
+                  class="form-control mg-right-sm"
+                  :disabled="!config.status"
+                />
+                <label class="no-mg-bottom" :for="'ck-' + role">
+                  <span :class="['label', 'mg-left-xs', 'bg-' + role]">{{ role }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- zones ////-->
+        <!-- <div v-if="!isLoaded.accessZones" class="spinner form-spinner-loader mg-left-sm"></div>
+        <div v-else class="form-group">
+          <label class="col-sm-2 control-label pad-top-xs">{{$t('settings.interfaces')}}</label>
+          <div class="col-sm-4">
+            <div id="pf-list-standard" class="list-group list-view-pf interface-list">
+              <div v-for="(network, networkName) in networks" class="list-group-item">
+                <input
+                  type="checkbox"
+                  v-model="networks[networkName].selected"
+                  :id="'ck-' + networkName"
+                  class="form-control mg-right-sm"
+                />
+                <label class="no-mg-bottom" :for="'ck-' + networkName">
+                  {{ networkName }}
+                  <span
+                    :class="['label', 'mg-left-xs', roles.includes(network.props.role) ? 'bg-' + network.props.role : 'bg-gray']"
+                  >{{ network.props.role }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>-->
         <!-- whitelist -->
         <div :class="['form-group', {'has-error': error.whitelist}]">
           <label class="col-sm-2 control-label">{{$t('settings.whitelist')}}</label>
@@ -116,6 +162,7 @@
                           :onInputChange="filterWhitelistElem"
                           :onItemSelected="selectWhitelistElem"
                           ref="whitelistSuggestions"
+                          :disabled="!config.status"
                         >
                           <div slot="item" slot-scope="props" class="single-item">
                             <span>
@@ -162,12 +209,10 @@
     <!-- categories -->
     <div class="right">
       <label class="gray mg-right-md">
-        <span v-if="enabledCategories.length && config.status">
-          {{ enabledCategories.length }} {{$t('settings.categories_enabled')}}
-        </span>
-        <span v-else>
-          {{$t('settings.no_category_enabled')}}
-        </span>
+        <span
+          v-if="enabledCategories.length && config.status"
+        >{{ enabledCategories.length }} {{$t('settings.categories_enabled')}}</span>
+        <span v-else>{{$t('settings.no_category_enabled')}}</span>
       </label>
       <button
         class="btn btn-default mg-right-xs"
@@ -198,7 +243,10 @@
           :lineNumbers="false"
           :sort-options="{
             enabled: true,
-            initialSortBy: {field: 'enabled', type: 'desc'},
+            initialSortBy: [
+              {field: 'enabled', type: 'desc'},
+              {field: 'confidence', type: 'desc'}
+            ],
           }"
           :search-options="{
             enabled: true,
@@ -229,25 +277,37 @@
               </label>
             </span>
             <span v-else-if="props.column.field == 'name'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                <span :title="$te(props.row.id + '_description') ? $t(props.row.id + '_description') : ''">
-                  <span class="semi-bold">{{$t(props.row.id)}}</span>
+              <label
+                :for="'checkbox_' + props.row.id"
+                :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+              >
+                <span
+                  :title="$te('categories.' + props.row.id + '_description') ? $t('categories.' + props.row.id + '_description') : ''"
+                >
+                  <span class="semi-bold">{{$t('categories.' + props.row.id)}}</span>
                 </span>
               </label>
             </span>
             <span v-else-if="props.column.field == 'enabled'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
+              <label
+                :for="'checkbox_' + props.row.id"
+                :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+              >
                 <span
                   :class="['category-status-icon', 'pficon', (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
                 ></span>
-                <span :class="{'green': (props.row.enabled && config.status)}">
-                  {{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}
-                </span>
+                <span
+                  :class="{'green': (props.row.enabled && config.status)}"
+                >{{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}</span>
               </label>
             </span>
             <span v-else-if="props.column.field == 'confidence'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                <span :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
+              <label
+                :for="'checkbox_' + props.row.id"
+                :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+              >
+                <span
+                  :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
                   {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)}]"
                 >
                   <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
@@ -256,14 +316,16 @@
               </label>
             </span>
             <span v-else-if="props.column.field == 'type'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                {{(props.row.type ? props.row.type : '-') | capitalize}}
-              </label>
+              <label
+                :for="'checkbox_' + props.row.id"
+                :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+              >{{(props.row.type ? props.row.type : '-') | capitalize}}</label>
             </span>
             <span v-else-if="props.column.field == 'maintainer'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                {{props.row.maintainer ? props.row.maintainer : '-'}}
-              </label>
+              <label
+                :for="'checkbox_' + props.row.id"
+                :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+              >{{props.row.maintainer ? props.row.maintainer : '-'}}</label>
             </span>
           </template>
         </vue-good-table>
@@ -274,7 +336,7 @@
 
 <script>
 export default {
-  name: "Settings",
+  name: "DnsBlacklist",
   mounted() {
     this.getBlacklistData();
   },
@@ -283,6 +345,7 @@ export default {
       errorMessage: null,
       isLoaded: {
         config: false,
+        accessZones: false,
         categories: false,
         save: true
       },
@@ -345,7 +408,15 @@ export default {
       },
       newWhitelistElemType: "",
       hosts: [],
-      cidrSubs: []
+      cidrSubs: [],
+      allRoles: ["green", "blue", "orange", "hotspot"],
+      // roles: { ////
+      //   green: false,
+      //   blue: false,
+      //   orange: false,
+      //   hotspot: false
+      // },
+      roles: {}
     };
   },
   computed: {
@@ -372,12 +443,11 @@ export default {
     },
     getBlacklistData() {
       this.getFirewallUiInstalled();
-      this.getConfig();
     },
     getFirewallUiInstalled() {
       const context = this;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/dnss/read"],
         {
           action: "firewall-ui-installed"
         },
@@ -390,6 +460,8 @@ export default {
             if (context.firewallUiInstalled) {
               context.getHosts();
               context.getCIDRSubs();
+            } else {
+              context.getZones(); ////
             }
           } catch (e) {
             console.error(e);
@@ -404,7 +476,7 @@ export default {
       const context = this;
       context.isLoaded.config = false;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/dnss/read"],
         {
           action: "configuration"
         },
@@ -412,45 +484,52 @@ export default {
         function(success) {
           try {
             success = JSON.parse(success);
-            const props = success.configuration.props;
-
-            if (props.status === "enabled") {
-              context.config.status = true;
-            } else {
-              context.config.status = false;
-            }
-            context.config.url = props.Url;
-            context.config.lastUrl = context.config.url;
-            context.config.whitelist = context.buildWhitelist(props.Whitelist);
-            context.config.categories = props.Categories.split(",");
-            context.isLoaded.config = true;
-            context.getCategories();
           } catch (e) {
             console.error(e);
           }
+          const props = success.configuration.props;
+
+          if (props.status === "enabled") {
+            context.config.status = true;
+          } else {
+            context.config.status = false;
+          }
+          context.config.url = props.Url;
+          context.config.lastUrl = context.config.url;
+          context.config.whitelist = context.buildWhitelist(props.Bypass);
+          context.config.categories = props.Categories.split(",");
+          // use filter() to skip empty strings
+          const selectedRoles = props.Roles.split(",").filter(Boolean);
+
+          for (let selectedRole of selectedRoles) {
+            context.roles[selectedRole] = true;
+          }
+          context.isLoaded.config = true;
+          context.getCategories();
         },
         function(error) {
           console.error(error);
+          context.isLoaded.config = true;
         }
       );
     },
     buildWhitelist(whitelistString) {
-      var whitelistIds = whitelistString.split(",");
-      var whitelist = [];
+      let whitelistIds = whitelistString.split(",");
+      let whitelist = [];
 
-      for (var whitelistId of whitelistIds) {
+      for (let whitelistId of whitelistIds) {
         if (whitelistId) {
           if (whitelistId.startsWith("host;")) {
             const hostName = whitelistId.replace("host;", "");
 
-            var host = this.hosts.find(host => {
+            let host = this.hosts.find(host => {
               return host.name === hostName;
             });
             whitelist.push(host);
           } else if (whitelistId.startsWith("cidr;")) {
             const cidrName = whitelistId.replace("cidr;", "");
 
-            var cidr = this.cidrSubs.find(cidr => {
+            let cidr = this.cidrSubs.find(cidr => {
               return cidr.name === cidrName;
             });
             whitelist.push(cidr);
@@ -465,7 +544,7 @@ export default {
       const context = this;
       context.isLoaded.categories = false;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/dnss/read"],
         {
           action: "categories"
         },
@@ -473,28 +552,28 @@ export default {
         function(success) {
           try {
             success = JSON.parse(success);
-            let categories = success.categories;
-
-            categories.forEach(category => {
-              category.enabled = false;
-              category.selected = false;
-            });
-
-            context.config.categories.forEach(enabledCategory => {
-              let categoryFound = categories.find(category => {
-                return category.id === enabledCategory;
-              });
-
-              if (categoryFound) {
-                categoryFound.enabled = true;
-              }
-            });
-            context.allCategories = categories;
-            context.isLoaded.categories = true;
           } catch (e) {
             console.error(e);
             context.isLoaded.categories = true;
           }
+          let categories = success.categories;
+
+          categories.forEach(category => {
+            category.enabled = false;
+            category.selected = false;
+          });
+
+          context.config.categories.forEach(enabledCategory => {
+            let categoryFound = categories.find(category => {
+              return category.id === enabledCategory;
+            });
+
+            if (categoryFound) {
+              categoryFound.enabled = true;
+            }
+          });
+          context.allCategories = categories;
+          context.isLoaded.categories = true;
         },
         function(error) {
           console.error(error);
@@ -504,9 +583,9 @@ export default {
     },
     getWhitelistIds() {
       // return an array with the correct IDs of whitelist
-      var whitelistIds = [];
+      let whitelistIds = [];
 
-      for (var elem of this.config.whitelist) {
+      for (let elem of this.config.whitelist) {
         if (!elem.typeId) {
           // manually entered
           whitelistIds.push(elem.name);
@@ -528,6 +607,16 @@ export default {
       }
       return categoryIds;
     },
+    getSelectedRoles() {
+      let selectedRoles = [];
+
+      for (const [role, selected] of Object.entries(this.roles)) {
+        if (selected) {
+          selectedRoles.push(role);
+        }
+      }
+      return selectedRoles;
+    },
     saveSettings(saveButtonLoader) {
       if (saveButtonLoader) {
         this.isLoaded.save = false;
@@ -536,16 +625,17 @@ export default {
       this.error.url = null;
       this.error.whitelist = null;
 
-      var validateObj = {
+      let validateObj = {
         status: this.config.status ? "enabled" : "disabled",
         Url: this.config.url,
-        Whitelist: this.getWhitelistIds(),
-        Categories: this.getSelectedCategoriesIds()
+        Bypass: this.getWhitelistIds(),
+        Categories: this.getSelectedCategoriesIds(),
+        Roles: this.getSelectedRoles()
       };
 
       const context = this;
       nethserver.exec(
-        ["nethserver-blacklist/settings/validate"],
+        ["nethserver-blacklist/dnss/validate"],
         validateObj,
         null,
         function(success) {
@@ -565,7 +655,7 @@ export default {
       );
       const context = this;
       nethserver.exec(
-        ["nethserver-blacklist/settings/update"],
+        ["nethserver-blacklist/dnss/update"],
         validateObj,
         function(stream) {
           console.info("blacklist-configuration-update", stream);
@@ -594,7 +684,7 @@ export default {
         if (param === "Url") {
           this.error.url = attr.error;
           this.$refs.blacklistUrl.focus();
-        } else if (param === "Whitelist") {
+        } else if (param === "Bypass") {
           this.error.whitelist = attr.error;
         }
       }
@@ -607,7 +697,7 @@ export default {
       if (query.trim().length === 0) {
         return null;
       }
-      var objects = this.hosts.concat(this.cidrSubs);
+      let objects = this.hosts.concat(this.cidrSubs);
 
       return objects.filter(function(service) {
         return (
@@ -658,6 +748,7 @@ export default {
             i.typeId = "host";
             return i;
           });
+          // context.getZones(); ////
         },
         function(error) {
           console.error(error);
@@ -685,7 +776,7 @@ export default {
             i.typeId = "cidr";
             return i;
           });
-          context.getConfig();
+          // context.getZones();
         },
         function(error) {
           console.error(error);
@@ -774,6 +865,58 @@ export default {
     },
     rowStyleClassFn(row) {
       return row.selected ? "active" : "";
+    },
+    getZones() {
+      const context = this;
+      context.isLoaded.accessZones = false;
+      nethserver.exec(
+        ["nethserver-firewall-base/rules/read"],
+        {
+          action: "roles"
+        },
+        null,
+        function(success) {
+          try {
+            success = JSON.parse(success);
+          } catch (e) {
+            console.error(e);
+          }
+          let configuredRoles = success.roles;
+
+          for (let configuredRole of configuredRoles) {
+            if (context.allRoles.includes(configuredRole)) {
+              context.roles[configuredRole] = false;
+            }
+          }
+          context.getConfig();
+
+          //       nethserver.exec( ////
+          //         ["nethserver-firewall-base/objects/read"],
+          //         {
+          //           action: "zones"
+          //         },
+          //         null,
+          //         function(success) {
+          //           try {
+          //             success = JSON.parse(success);
+          //           } catch (e) {
+          //             console.error(e);
+          //           }
+          //           let zones = success.zones.map(zone => zone.name);
+          //           context.accessZones = roles.concat(zones);
+          //           context.isLoaded.accessZones = true;
+          //         },
+          //         function(error) {
+          //           console.error(error);
+          //           context.isLoaded.accessZones = true;
+          //         }
+          //       );
+        },
+        function(error) {
+          console.error(error);
+          context.isLoaded.accessZones = true;
+        }
+      );
     }
   }
 };
@@ -860,5 +1003,9 @@ export default {
   margin: 0;
   width: 100%;
   height: 100%;
+}
+
+.roles-list {
+  border: 1px solid lightgray;
 }
 </style>
