@@ -20,10 +20,25 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-URL=$(/sbin/e-smith/config getprop blacklist Url)
+# get TYPE from event (ipsets or dnss)
+TYPE=$1
+
+# switch prop based on type
+PROP=blacklist
+case $TYPE in
+    ipsets)
+        PROP=blacklist
+        ;;
+
+    dnss)
+        PROP=ftl
+        ;;
+esac
+
+URL=$(/sbin/e-smith/config getprop $PROP Url)
 SYSTEM_ID=$(/sbin/e-smith/config getprop subscription SystemId)
 SYSTEM_SECRET=$(/sbin/e-smith/config getprop subscription Secret)
-DEST_DIR=/usr/share/nethserver-blacklist/ipsets
+DEST_DIR=/usr/share/nethserver-blacklist/$TYPE
 DEBUG=0
 
 function exit_error {
@@ -39,7 +54,7 @@ function debug {
 
 
 options=$(getopt -o d --long debug -- "$@")
-[ $? -eq 0 ] || { 
+[ $? -eq 0 ] || {
     >&2 echo "Incorrect options provided"
     exit 1
 }
@@ -87,7 +102,7 @@ if [ ! -d "$DEST_DIR/.git" ]; then
         exit_error "Can't download blacklist repository"
     fi
 
-    # do not leak secret 
+    # do not leak secret
     chmod 600 "$DEST_DIR/.git/config"
 else
     # Pull changes
@@ -104,8 +119,8 @@ else
         if [ $DEBUG -eq 1 ]; then
             debug_flag="-d"
         fi
-        debug "Repository have been updated: reloading ipset"
-        exec /usr/share/nethserver-blacklist/load-ipsets --reload $debug_flag
+        debug "Repository have been updated: reloading $TYPE"
+        exec /usr/share/nethserver-blacklist/load-$TYPE --reload $debug_flag
     else
         debug "Can't update blacklist repository: hard reset failed"
     fi

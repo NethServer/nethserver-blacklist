@@ -1,8 +1,17 @@
 {
-    my $status = $blacklist{'status'} || 'disabled';
-    if ($status eq 'enabled') {
-        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download'
+    my $ip_status = $blacklist{'status'} || 'disabled';
+    if ($ip_status eq 'enabled') {
+        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download ipsets'
     } else {
-        $OUT .= "# Blacklists are disabled"
+        $OUT .= "# Blacklists (ip) are disabled"
+    }
+
+    $OUT .= "\n";
+
+    my $dns_status = $ftl{'status'} || 'disabled';
+    if ($dns_status eq 'enabled') {
+        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download dnss'
+    } else {
+        $OUT .= "# Blacklists (dns) are disabled"
     }
 }

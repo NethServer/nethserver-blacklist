@@ -23,8 +23,10 @@
 #
 # Download the blacklists for the first time
 #
+EVENT=$1    # name of the event (not used)
+TYPE=$2     # blacklist type (ipsets or dnss)
 
 status=$(/sbin/e-smith/config getprop blacklist status)
 if [[ "$status" == "enabled" ]]; then
-    exec /usr/share/nethserver-blacklist/download
+    exec /usr/share/nethserver-blacklist/download $TYPE
 fi
