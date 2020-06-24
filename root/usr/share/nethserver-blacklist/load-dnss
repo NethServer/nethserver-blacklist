@@ -68,6 +68,7 @@ while true; do
 done
 
 # Cleanup all blacklist dns
+debug "Clean current gravity db and initialize again"
 /usr/bin/rm -rf $GRAVITY_DB && $SQLITE $GRAVITY_DB < $GRAVITY_DB_SCHEMA
 
 # Exit if status of ftl is disabled
@@ -80,21 +81,27 @@ fi
 ID=1
 
 # loop for each enabled categories
+debug "Loop enabled categories"
 for category in $CATEGORIES; do
     # compose file name
     file="$DNSDIR/$category.dns"
+    debug "Get .dns file: $file"
 
     # create target import file
     target="$(mktemp -p "/tmp" --suffix=".gravity")"
+    debug "Create temporary file in: $target"
 
     # write to file
     sed '/^#/d' $file | sed "s/$/,$ID/" > $target
+    debug "Write parsed domains in CSV format"
 
     # load category in gravity db
+    debug "Load $category inside gravity db"
     $SQLITE $GRAVITY_DB \
         "INSERT INTO 'adlist' VALUES($ID, 'file://$file', 1, date(), date(), '$category')"
 
     # load domains in gravity db
+    debug "Load domains of $category inside gravity db"
     output=$( { printf ".timeout 30000\\n.mode csv\\n.import \"%s\" gravity\\n" "$target" | sqlite3 "$GRAVITY_DB"; } 2>&1 )
     status="$?"
 
@@ -106,12 +113,15 @@ for category in $CATEGORIES; do
     ID=$((ID+1))
 
     # remove temporary file
+    debug "Remove $target file"
     /usr/bin/rm -rf $target
 done
 
 # update domains count
 count=$($SQLITE $GRAVITY_DB 'SELECT COUNT(DISTINCT domain) FROM vw_gravity;')
 $SQLITE "$GRAVITY_DB" "INSERT OR REPLACE INTO info (property, value) VALUES ('gravity_count', $count);"
+debug "Update total domains in gravity db. There are $count domains"
 
 # restart ftl and load new domains
+debug "Restart ftl"
 /usr/bin/systemctl restart ftl
