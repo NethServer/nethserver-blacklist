@@ -102,7 +102,7 @@ for category in $CATEGORIES; do
 
     # load domains in gravity db
     debug "Load domains of $category inside gravity db"
-    output=$( { printf ".timeout 30000\\n.mode csv\\n.import \"%s\" gravity\\n" "$target" | sqlite3 "$GRAVITY_DB"; } 2>&1 )
+    output=$( { printf ".timeout 30000\\n.mode csv\\n.import \"%s\" gravity\\n" "$target" | $SQLITE "$GRAVITY_DB"; } 2>&1 )
     status="$?"
 
     if [[ "${status}" -ne 0 ]]; then
