@@ -73,7 +73,7 @@
         <button
           type="button"
           class="btn btn-default"
-          :disabled="!isLoaded.updateIp || !ipConfig.url"
+          :disabled="!isLoaded.updateIp || !ipConfig.url || !ipConfig.status"
           @click="updateIpBlacklist()"
         >{{ $t('dashboard.check_for_updates') }}</button>
         <div v-if="!isLoaded.updateIp" class="spinner form-spinner-loader mg-left-md"></div>
@@ -85,7 +85,7 @@
         <button
           type="button"
           class="btn btn-default"
-          :disabled="!isLoaded.updateDns || !dnsConfig.url"
+          :disabled="!isLoaded.updateDns || !dnsConfig.url || !dnsConfig.status"
           @click="updateDnsBlacklist()"
         >{{ $t('dashboard.check_for_updates') }}</button>
         <div v-if="!isLoaded.updateDns" class="spinner form-spinner-loader mg-left-md"></div>

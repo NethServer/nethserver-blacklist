@@ -36,7 +36,10 @@
       <form class="form-horizontal" v-on:submit.prevent="saveSettings(true)">
         <!-- status -->
         <div class="form-group">
-          <label class="col-sm-2 control-label" for="blacklist-status">{{$t('ip_blacklist.enable_ip_blacklist')}}</label>
+          <label
+            class="col-sm-2 control-label"
+            for="blacklist-status"
+          >{{$t('ip_blacklist.enable_ip_blacklist')}}</label>
           <div class="col-sm-2">
             <input
               type="checkbox"
@@ -164,12 +167,10 @@
     <div>
       <div class="right">
         <label class="gray mg-right-md">
-          <span v-if="enabledCategories.length && config.status">
-            {{ enabledCategories.length }} {{$t('settings.categories_enabled')}}
-          </span>
-          <span v-else>
-            {{$t('settings.no_category_enabled')}}
-          </span>
+          <span
+            v-if="enabledCategories.length && config.status"
+          >{{ enabledCategories.length }} {{$t('settings.categories_enabled')}}</span>
+          <span v-else>{{$t('settings.no_category_enabled')}}</span>
         </label>
         <button
           class="btn btn-default mg-right-xs"
@@ -234,25 +235,39 @@
                 </label>
               </span>
               <span v-else-if="props.column.field == 'name'">
-                <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                  <span :title="$te('categories.' + props.row.id + '_description') ? $t('categories.' + props.row.id + '_description') : ''">
-                    <span class="semi-bold">{{$t('categories.' + props.row.id)}}</span>
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >
+                  <span
+                    :title="$te('categories.' + props.row.id + '_description') ? $t('categories.' + props.row.id + '_description') : ''"
+                  >
+                    <span
+                      class="semi-bold"
+                    >{{$te('categories.' + props.row.id) ? $t('categories.' + props.row.id) : props.row.id | prettyString}}</span>
                   </span>
                 </label>
               </span>
               <span v-else-if="props.column.field == 'enabled'">
-                <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >
                   <span
                     :class="['category-status-icon', 'pficon', (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
                   ></span>
-                  <span :class="{'green': (props.row.enabled && config.status)}">
-                    {{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}
-                  </span>
+                  <span
+                    :class="{'green': (props.row.enabled && config.status)}"
+                  >{{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}</span>
                 </label>
               </span>
               <span v-else-if="props.column.field == 'confidence'">
-                <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                  <span :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >
+                  <span
+                    :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
                     {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)}]"
                   >
                     <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
@@ -261,14 +276,16 @@
                 </label>
               </span>
               <span v-else-if="props.column.field == 'type'">
-                <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                  {{(props.row.type ? props.row.type : '-') | capitalize}}
-                </label>
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >{{(props.row.type ? props.row.type : '-') | capitalize}}</label>
               </span>
               <span v-else-if="props.column.field == 'maintainer'">
-                <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                  {{props.row.maintainer ? props.row.maintainer : '-'}}
-                </label>
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >{{props.row.maintainer ? props.row.maintainer : '-'}}</label>
               </span>
             </template>
           </vue-good-table>
@@ -394,9 +411,8 @@ export default {
 
             if (context.firewallUiInstalled) {
               context.getHosts();
-              context.getCIDRSubs();
             } else {
-              context.getConfig(); ////
+              context.getConfig();
             }
           } catch (e) {
             console.error(e);
@@ -665,6 +681,7 @@ export default {
             i.typeId = "host";
             return i;
           });
+          context.getCIDRSubs();
         },
         function(error) {
           console.error(error);
@@ -692,7 +709,7 @@ export default {
             i.typeId = "cidr";
             return i;
           });
-          // context.getConfig(); ////
+          context.getConfig();
         },
         function(error) {
           console.error(error);
@@ -781,7 +798,7 @@ export default {
     },
     rowStyleClassFn(row) {
       return row.selected ? "active" : "";
-    }
+    },
   }
 };
 </script>

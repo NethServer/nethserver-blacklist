@@ -60,9 +60,12 @@ def validate_ip(input_json):
 def validate_domain(input_json):
     invalid_attributes = []
 
-    domain_p = 'ipOrDomain'
+    if 'domain' in input_json:
+        domain_p = 'domain'
+    elif 'ipOrDomain' in input_json:
+        domain_p = 'ipOrDomain'
 
-    if (domain_p not in input_json) or (not input_json[domain_p]):
+    if not input_json[domain_p]:
         invalid_attributes.append(invalid_attribute(domain_p, "empty"))
     else:
         domain = input_json[domain_p]
@@ -110,6 +113,8 @@ try:
     if action == 'search':
         if 'ipAddress' in input_json:
             validation_result = validate_ip(input_json)
+        elif 'domain' in input_json:
+            validation_result = validate_domain(input_json)
         elif 'ipOrDomain' in input_json:
             validation_result = validate_ip_or_domain(input_json)
         else:

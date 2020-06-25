@@ -25,11 +25,17 @@
     <h2>{{$t('analysis.title')}}</h2>
     <div v-show="!isLoaded.config" class="spinner form-spinner-loader mg-left-sm"></div>
     <div v-show="isLoaded.config">
-      <h3 v-if="!dnsConfig.status">{{$t('analysis.check_ip_address')}}</h3>
+      <h3 v-if="ipConfig.status && !dnsConfig.status">{{$t('analysis.check_ip_address')}}</h3>
+      <h3 v-else-if="!ipConfig.status && dnsConfig.status">{{$t('analysis.check_domain')}}</h3>
       <h3 v-else>{{$t('analysis.check_ip_address_or_domain')}}</h3>
+      <!-- cannot search banner -->
+      <div v-if="!ipConfig.status && !dnsConfig.status" class="alert alert-info alert-dismissable">
+        <span class="pficon pficon-info"></span>
+        <span>{{$t('analysis.cannot_search')}}</span>
+      </div>
       <!-- IP search -->
       <form
-        v-show="!dnsConfig.status"
+        v-show="ipConfig.status && !dnsConfig.status"
         class="form-horizontal"
         v-on:submit.prevent="validateSearchIp()"
       >
@@ -64,14 +70,56 @@
             <button
               class="btn btn-default"
               type="submit"
-              :disabled="!isLoaded.search || !isLoaded.categories"
+              :disabled="!isLoaded.search"
+            >{{$t('analysis.check')}}</button>
+          </span>
+        </div>
+      </form>
+      <!-- Domain search -->
+      <form
+        v-show="!ipConfig.status && dnsConfig.status"
+        class="form-horizontal"
+        v-on:submit.prevent="validateSearchDomain()"
+      >
+        <div :class="['form-group', {'has-error': error.domainSearch}]">
+          <label class="col-sm-2 control-label" for="domain-search">
+            {{$t('analysis.domain')}}
+            <doc-info :placement="'bottom'" :chapter="'search_domain'" :inline="true"></doc-info>
+          </label>
+          <div class="col-sm-3">
+            <input
+              type="text"
+              v-model="domainSearch"
+              id="domain-search"
+              ref="domainSearch"
+              class="form-control"
+            />
+            <span
+              v-if="error.domainSearch"
+              class="help-block"
+            >{{$t('validation.domain_search_' + error.domainSearch)}}</span>
+          </div>
+        </div>
+        <!-- check domain button -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label label-loader">
+            <div
+              v-if="!isLoaded.search"
+              class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+            ></div>
+          </label>
+          <span class="col-sm-2">
+            <button
+              class="btn btn-default"
+              type="submit"
+              :disabled="!isLoaded.search"
             >{{$t('analysis.check')}}</button>
           </span>
         </div>
       </form>
       <!-- IP or domain search -->
       <form
-        v-show="dnsConfig.status"
+        v-show="(ipConfig.status && dnsConfig.status) || (!ipConfig.status && !dnsConfig.status)"
         class="form-horizontal"
         v-on:submit.prevent="validateSearchIpOrDomain()"
       >
@@ -87,6 +135,7 @@
               id="ip-domain-search"
               ref="ipOrDomainSearch"
               class="form-control"
+              :disabled="!ipConfig.status && !dnsConfig.status"
             />
             <span
               v-if="error.ipOrDomainSearch"
@@ -106,15 +155,30 @@
             <button
               class="btn btn-default"
               type="submit"
-              :disabled="!isLoaded.search || !isLoaded.categories"
+              :disabled="!isLoaded.search || (!ipConfig.status && !dnsConfig.status)"
             >{{$t('analysis.check')}}</button>
           </span>
         </div>
       </form>
     </div>
 
-    <h3>{{$t('analysis.logs')}}</h3>
+    <h3>{{$t('analysis.recent_logs')}}</h3>
     <form class="form-horizontal" v-on:submit.prevent="getLogs()">
+      <!-- logs type -->
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="searchFilter">{{$t('analysis.logs')}}</label>
+        <div class="col-sm-3">
+          <select
+            class="combobox form-control"
+            v-model="logsType"
+            :disabled="!dnsConfig.status"
+            @change="getLogs()"
+          >
+            <option value="ip">{{$t('ip_blacklist.title')}}</option>
+            <option v-show="dnsConfig.status" value="dns">{{$t('dns_blacklist.title')}}</option>
+          </select>
+        </div>
+      </div>
       <!-- filter -->
       <div class="form-group">
         <label class="col-sm-2 control-label" for="searchFilter">{{$t('analysis.filter')}}</label>
@@ -151,10 +215,11 @@
     </form>
     <div v-show="!isLoaded.logs" class="spinner form-spinner-loader mg-left-sm"></div>
     <div v-show="isLoaded.logs">
-      <div class="col-sm-12">
+      <!-- IP logs -->
+      <div v-show="logsType == 'ip'" class="col-sm-12">
         <vue-good-table
-          :columns="columns"
-          :rows="logs"
+          :columns="ipColumns"
+          :rows="ipLogs"
           :lineNumbers="false"
           :sort-options="{
             enabled: true,
@@ -182,21 +247,25 @@
             </span>
             <span v-if="props.column.field == 'source'">
               <span
+                v-if="ipConfig.status"
                 data-toggle="tooltip"
                 data-placement="top"
                 :title="$t('analysis.check_ip_address')"
               >
                 <a @click="ipAddressClicked(props.row.source)">{{props.row.source}}</a>
               </span>
+              <span v-else>{{props.row.source}}</span>
             </span>
             <span v-if="props.column.field == 'dest'">
               <span
+                v-if="ipConfig.status"
                 data-toggle="tooltip"
                 data-placement="top"
                 :title="$t('analysis.check_ip_address')"
               >
                 <a @click="ipAddressClicked(props.row.dest)">{{props.row.dest}}</a>
               </span>
+              <span v-else>{{props.row.dest}}</span>
             </span>
             <span v-if="props.column.field == 'protocol'">
               <span>{{props.row.protocol || '-'}}</span>
@@ -206,6 +275,56 @@
             </span>
             <span v-if="props.column.field == 'dest_service'">
               <span>{{props.row.dest_service || '-'}}</span>
+            </span>
+          </template>
+        </vue-good-table>
+      </div>
+      <!-- DNS logs -->
+      <div v-show="logsType == 'dns'" class="col-sm-12">
+        <vue-good-table
+          :columns="dnsColumns"
+          :rows="dnsLogs"
+          :lineNumbers="false"
+          :sort-options="{
+            enabled: true,
+            initialSortBy: {field: 'seconds', type: 'desc'},
+          }"
+          :search-options="{
+            enabled: false,
+          }"
+          :pagination-options="{
+            enabled: true,
+            rowsPerPageLabel: tableLangsTexts.rowsPerPageText,
+            nextLabel: tableLangsTexts.nextText,
+            prevLabel: tableLangsTexts.prevText,
+            ofLabel: tableLangsTexts.ofText,
+            dropdownAllowAll: false,
+          }"
+          styleClass="table condensed responsive vgt2"
+        >
+          <template slot="table-row" slot-scope="props">
+            <span v-if="props.column.field == 'seconds'">
+              <span>{{props.row.seconds | shortDateFormat}}</span>
+            </span>
+            <span v-if="props.column.field == 'source'">
+              <span>{{props.row.source}}</span>
+            </span>
+            <span v-if="props.column.field == 'dest'">
+              <span
+                v-if="dnsConfig.status"
+                data-toggle="tooltip"
+                data-placement="top"
+                :title="$t('analysis.check_domain')"
+              >
+                <a @click="domainClicked(props.row.dest)">{{props.row.dest}}</a>
+              </span>
+              <span v-else>{{props.row.dest}}</span>
+            </span>
+            <span v-if="props.column.field == 'queryStatus.description'">
+              <span>{{props.row.queryStatus.description || '-'}}</span>
+            </span>
+            <span v-if="props.column.field == 'recordType'">
+              <span>{{props.row.recordType || '-'}}</span>
             </span>
           </template>
         </vue-good-table>
@@ -222,9 +341,13 @@
           </div>
           <form class="form-horizontal">
             <div class="modal-body">
-              <!-- banner -->
-              <div class="alert alert-info alert-dismissable">
-                <span class="pficon pficon-info"></span>
+              <!-- result banner -->
+              <div
+                :class="['alert', 'alert-dismissable', searchResult.categories && searchResult.categories.length ? 'alert-warning' : 'alert-info' ]"
+              >
+                <span
+                  :class="['pficon', searchResult.categories && searchResult.categories.length ? 'pficon-warning-triangle-o' : 'pficon-info']"
+                ></span>
                 <span v-if="searchResult.ipAddress">
                   {{$t('analysis.ip_address')}}
                   <span
@@ -257,7 +380,6 @@
                   <span class="search-result">
                     <span
                       v-if="searchResult.categories && searchResult.categories.length"
-                      class="search-result"
                     >
                       <div
                         v-for="(category, index) in searchResult.categories"
@@ -283,11 +405,10 @@
                 </div>
                 <div class="form-group">
                   <label class="col-sm-3 control-label">{{$t('analysis.requested_by')}}</label>
-                  <div class="col-sm-9">
+                  <div class="col-sm-5 clients-list">
                     <span class="search-result">
                       <span
                         v-if="searchResult.clients && searchResult.clients.length"
-                        class="search-result"
                       >
                         <div
                           v-for="(client, index) in searchResult.clients"
@@ -315,17 +436,15 @@ export default {
   name: "Analysis",
   mounted() {
     this.getIpConfig();
-    this.getCategories();
-    this.getLogs();
   },
   data() {
     return {
       searchFilter: "",
-      logs: [],
+      ipLogs: [],
+      dnsLogs: [],
       lines: 500,
       isLoaded: {
         search: true,
-        categories: false,
         logs: false,
         config: false
       },
@@ -336,7 +455,7 @@ export default {
         status: false
       },
       tableLangsTexts: this.tableLangs(),
-      columns: [
+      ipColumns: [
         {
           label: this.$i18n.t("analysis.time"),
           field: "seconds",
@@ -375,30 +494,67 @@ export default {
           sortable: true
         }
       ],
+      dnsColumns: [
+        {
+          label: this.$i18n.t("analysis.time"),
+          field: "seconds",
+          sortable: true,
+          type: "number"
+        },
+        {
+          label: this.$i18n.t("analysis.source"),
+          field: "source",
+          sortable: true
+        },
+        {
+          label: this.$i18n.t("analysis.destination"),
+          field: "dest",
+          sortable: true
+        },
+        {
+          label: this.$i18n.t("analysis.query_status"),
+          field: "queryStatus.description",
+          sortable: true
+        },
+        {
+          label: this.$i18n.t("analysis.record_type"),
+          field: "recordType",
+          sortable: true
+        }
+      ],
       error: {
-        ipSearch: false
+        ipSearch: false,
+        domainSearch: false,
+        ipOrDomainSearch: false
       },
       ipSearch: "",
+      domainSearch: "",
       ipOrDomainSearch: "",
       searchResult: {},
-      allCategories: []
+      logsType: ""
     };
   },
   methods: {
     getLogs() {
       this.isLoaded.logs = false;
+      this.searchFilter = this.searchFilter.trim();
       const context = this;
       nethserver.exec(
         ["nethserver-blacklist/analysis/read"],
         {
           action: "logs",
           filter: this.searchFilter,
-          lines: this.lines
+          lines: this.lines,
+          type: this.logsType
         },
         null,
         function(success) {
           success = JSON.parse(success);
-          context.logs = success.logs;
+          if (context.logsType === "ip") {
+            context.ipLogs = success.logs;
+          } else {
+            context.dnsLogs = success.logs;
+          }
           context.isLoaded.logs = true;
           context.updateTooltips();
         },
@@ -410,9 +566,11 @@ export default {
         true
       );
     },
-    validateSearchIp() {
+    validateSearchIp(hideLoader) {
+      if (!hideLoader) {
+        this.isLoaded.search = false;
+      }
       this.error.ipSearch = false;
-      this.isLoaded.search = false;
       this.ipSearch = this.ipSearch.trim();
 
       var validateObj = {
@@ -427,6 +585,31 @@ export default {
         null,
         function(success) {
           context.searchIp(validateObj);
+        },
+        function(error, data) {
+          context.validationError(error, data);
+        }
+      );
+    },
+    validateSearchDomain(hideLoader) {
+      if (!hideLoader) {
+        this.isLoaded.search = false;
+      }
+      this.error.domainSearch = false;
+      this.domainSearch = this.domainSearch.trim();
+
+      var validateObj = {
+        action: "search",
+        domain: this.domainSearch
+      };
+
+      const context = this;
+      nethserver.exec(
+        ["nethserver-blacklist/analysis/validate"],
+        validateObj,
+        null,
+        function(success) {
+          context.searchDomain(validateObj);
         },
         function(error, data) {
           context.validationError(error, data);
@@ -486,6 +669,9 @@ export default {
         if (param === "ipAddress") {
           this.error.ipSearch = attr.error;
           this.$refs.ipSearch.focus();
+        } else if (param === "domain") {
+          this.error.domainSearch = attr.error;
+          this.$refs.domainSearch.focus();
         } else if (param === "ipOrDomain") {
           this.error.ipOrDomainSearch = attr.error;
           this.$refs.ipOrDomainSearch.focus();
@@ -498,9 +684,12 @@ export default {
       }, 300);
     },
     ipAddressClicked(ipAddress) {
-      window.scrollTo(0, 0);
       this.ipSearch = ipAddress;
-      this.validateSearchIp();
+      this.validateSearchIp(true);
+    },
+    domainClicked(domain) {
+      this.domainSearch = domain;
+      this.validateSearchDomain(true);
     },
     searchIp(validateObj) {
       var context = this;
@@ -535,29 +724,6 @@ export default {
         function(error, data) {
           console.error(error);
           context.isLoaded.search = true;
-        }
-      );
-    },
-    getCategories() {
-      const context = this;
-      context.isLoaded.categories = false;
-      nethserver.exec(
-        ["nethserver-blacklist/ipsets/read"],
-        {
-          action: "categories"
-        },
-        null,
-        function(success) {
-          try {
-            success = JSON.parse(success);
-            context.allCategories = success.categories;
-            context.isLoaded.categories = true;
-          } catch (e) {
-            console.error(e);
-          }
-        },
-        function(error) {
-          console.error(error);
         }
       );
     },
@@ -612,7 +778,14 @@ export default {
           } else {
             context.dnsConfig.status = false;
           }
+
+          if (!context.ipConfig.status && context.dnsConfig.status) {
+            context.logsType = "dns";
+          } else {
+            context.logsType = "ip";
+          }
           context.isLoaded.config = true;
+          context.getLogs();
         },
         function(error) {
           console.error(error);
@@ -627,6 +800,11 @@ export default {
 <style scoped>
 .search-result {
   display: inline-block;
-  padding-top: 2px;
+  padding-top: 3px;
+}
+
+.clients-list {
+  max-height: 9rem;
+  overflow-y: scroll;
 }
 </style>

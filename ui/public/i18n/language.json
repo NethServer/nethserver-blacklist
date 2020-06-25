@@ -104,17 +104,17 @@
         "filter": "Search filter",
         "lines": "Max lines",
         "lines_placeholder": "Maximum number of log lines",
-        "logs": "Recent logs",
+        "recent_logs": "Recent logs",
         "check_ip_address": "Check IP address",
         "check_domain": "Check domain",
         "check_ip_address_or_domain": "Check IP address or domain",
         "ip_address": "IP address",
         "domain": "Domain",
         "ip_or_domain": "IP or domain",
-        "is_not_blocked_by_ip_blacklist": "is not blocked by IP blacklist",
-        "is_blocked_by_ip_blacklist": "is blocked by IP blacklist",
-        "is_not_blocked_by_dns_blacklist": "is not blocked by DNS blacklist",
-        "is_blocked_by_dns_blacklist": "is blocked by DNS blacklist",
+        "is_not_blocked_by_ip_blacklist": "is currently allowed by IP blacklist",
+        "is_blocked_by_ip_blacklist": "is currently blocked by IP blacklist",
+        "is_not_blocked_by_dns_blacklist": "is currently allowed by DNS blacklist",
+        "is_blocked_by_dns_blacklist": "is currently blocked by DNS blacklist",
         "check": "Check",
         "search_logs": "Search logs",
         "blocked_by": "Blocked by",
@@ -122,7 +122,11 @@
         "blocked_requests": "Blocked requests",
         "total_requests": "Total requests",
         "requested_by": "Requested by",
-        "no_client": "(No client)"
+        "no_client": "(No client)",
+        "logs": "Logs",
+        "record_type": "Record type",
+        "query_status": "Query status",
+        "cannot_search": "Enable IP blacklist and/or DNS blacklist to check if an IP address or a domain is blocked"
     },
     "logs": {
         "title": "Logs",
@@ -147,12 +151,16 @@
         "url_invalid_git_repo": "Invalid git repository",
         "ip_search_empty": "IP address is mandatory",
         "ip_search_invalid": "Invalid IP address",
+        "domain_search_empty": "Domain is mandatory",
+        "domain_search_invalid": "Invalid domain",
         "ip_or_domain_search_empty": "IP address or domain is mandatory",
         "ip_or_domain_search_invalid": "Invalid IP address or domain"
     },
     "docs": {
         "blacklist_download_url": "This is where threats definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists",
-        "search_ip_address": "Check if this IP address is blocked by Threat shield blacklist",
-        "search_ip_or_domain": "Check if this IP or domain is blocked by Threat shield blacklist"
+        "search_ip_address": "Check if this IP address is blocked by IP blacklist",
+        "search_domain": "Check if this domain is blocked by DNS blacklist",
+        "search_ip_or_domain": "Check if this IP or domain is blocked by IP or DNS blacklist",
+        "whitelist_dns": "DNS requests from this sources are always allowed"
     }
 }

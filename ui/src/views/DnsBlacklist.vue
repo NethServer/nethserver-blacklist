@@ -87,32 +87,12 @@
             </div>
           </div>
         </div>
-        <!-- zones ////-->
-        <!-- <div v-if="!isLoaded.accessZones" class="spinner form-spinner-loader mg-left-sm"></div>
-        <div v-else class="form-group">
-          <label class="col-sm-2 control-label pad-top-xs">{{$t('settings.interfaces')}}</label>
-          <div class="col-sm-4">
-            <div id="pf-list-standard" class="list-group list-view-pf interface-list">
-              <div v-for="(network, networkName) in networks" class="list-group-item">
-                <input
-                  type="checkbox"
-                  v-model="networks[networkName].selected"
-                  :id="'ck-' + networkName"
-                  class="form-control mg-right-sm"
-                />
-                <label class="no-mg-bottom" :for="'ck-' + networkName">
-                  {{ networkName }}
-                  <span
-                    :class="['label', 'mg-left-xs', roles.includes(network.props.role) ? 'bg-' + network.props.role : 'bg-gray']"
-                  >{{ network.props.role }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>-->
         <!-- whitelist -->
         <div :class="['form-group', {'has-error': error.whitelist}]">
-          <label class="col-sm-2 control-label">{{$t('settings.whitelist')}}</label>
+          <label class="col-sm-2 control-label">
+            {{$t('settings.whitelist')}}
+            <doc-info :placement="'top'" :chapter="'whitelist_dns'" :inline="true"></doc-info>
+          </label>
           <div class="col-sm-5">
             <div id="pf-list-standard" class="list-group list-view-pf list-view-pf-view whitelist">
               <div v-for="item in config.whitelist" class="list-group-item">
@@ -285,7 +265,9 @@
                   <span
                     :title="$te('categories.' + props.row.id + '_description') ? $t('categories.' + props.row.id + '_description') : ''"
                   >
-                    <span class="semi-bold">{{$t('categories.' + props.row.id)}}</span>
+                    <span
+                      class="semi-bold"
+                    >{{$te('categories.' + props.row.id) ? $t('categories.' + props.row.id) : props.row.id | prettyString}}</span>
                   </span>
                 </label>
               </span>
@@ -412,12 +394,6 @@ export default {
       hosts: [],
       cidrSubs: [],
       allRoles: ["green", "blue", "orange", "hotspot"],
-      // roles: { ////
-      //   green: false,
-      //   blue: false,
-      //   orange: false,
-      //   hotspot: false
-      // },
       roles: {}
     };
   },
@@ -461,9 +437,8 @@ export default {
 
             if (context.firewallUiInstalled) {
               context.getHosts();
-              context.getCIDRSubs();
             } else {
-              context.getZones(); ////
+              context.getZones();
             }
           } catch (e) {
             console.error(e);
@@ -750,7 +725,7 @@ export default {
             i.typeId = "host";
             return i;
           });
-          // context.getZones(); ////
+          context.getCIDRSubs();
         },
         function(error) {
           console.error(error);
@@ -778,7 +753,7 @@ export default {
             i.typeId = "cidr";
             return i;
           });
-          // context.getZones();
+          context.getZones();
         },
         function(error) {
           console.error(error);
@@ -891,28 +866,6 @@ export default {
             }
           }
           context.getConfig();
-
-          //       nethserver.exec( ////
-          //         ["nethserver-firewall-base/objects/read"],
-          //         {
-          //           action: "zones"
-          //         },
-          //         null,
-          //         function(success) {
-          //           try {
-          //             success = JSON.parse(success);
-          //           } catch (e) {
-          //             console.error(e);
-          //           }
-          //           let zones = success.zones.map(zone => zone.name);
-          //           context.accessZones = roles.concat(zones);
-          //           context.isLoaded.accessZones = true;
-          //         },
-          //         function(error) {
-          //           console.error(error);
-          //           context.isLoaded.accessZones = true;
-          //         }
-          //       );
         },
         function(error) {
           console.error(error);
