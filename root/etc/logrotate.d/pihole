@@ -1,0 +1,9 @@
+/var/log/pihole-FTL.log {
+        weekly
+        copytruncate
+        rotate 3
+        compress
+        delaycompress
+        notifempty
+        nomail
+}
