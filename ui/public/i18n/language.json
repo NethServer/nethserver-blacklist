@@ -16,6 +16,7 @@
     "of": "of",
     "rows_per_page": "Rows per page",
     "all": "All",
+    "close": "Close",
     "dashboard": {
         "title": "Threat shield",
         "last_blacklist_definitions": "Last threats definitions",
@@ -104,12 +105,24 @@
         "lines": "Max lines",
         "lines_placeholder": "Maximum number of log lines",
         "logs": "Recent logs",
-        "ip_search_title": "Check IP address",
+        "check_ip_address": "Check IP address",
+        "check_domain": "Check domain",
+        "check_ip_address_or_domain": "Check IP address or domain",
         "ip_address": "IP address",
-        "ip_not_blocked": "is not blocked by Threat shield",
-        "ip_blocked_from_category": "is blocked by category",
+        "domain": "Domain",
+        "ip_or_domain": "IP or domain",
+        "is_not_blocked_by_ip_blacklist": "is not blocked by IP blacklist",
+        "is_blocked_by_ip_blacklist": "is blocked by IP blacklist",
+        "is_not_blocked_by_dns_blacklist": "is not blocked by DNS blacklist",
+        "is_blocked_by_dns_blacklist": "is blocked by DNS blacklist",
         "check": "Check",
-        "search_logs": "Search logs"
+        "search_logs": "Search logs",
+        "blocked_by": "Blocked by",
+        "no_category": "(No category)",
+        "blocked_requests": "Blocked requests",
+        "total_requests": "Total requests",
+        "requested_by": "Requested by",
+        "no_client": "(No client)"
     },
     "logs": {
         "title": "Logs",
@@ -133,10 +146,13 @@
         "url_invalid": "Invalid URL",
         "url_invalid_git_repo": "Invalid git repository",
         "ip_search_empty": "IP address is mandatory",
-        "ip_search_invalid": "Invalid IP address"
+        "ip_search_invalid": "Invalid IP address",
+        "ip_or_domain_search_empty": "IP address or domain is mandatory",
+        "ip_or_domain_search_invalid": "Invalid IP address or domain"
     },
     "docs": {
         "blacklist_download_url": "This is where threats definitions will be downloaded from. If the machine has a subscription, credentials will be automatically sent to remote server to access commercial blacklists",
-        "search_ip_address": "Check if this IP address is blocked by Threat shield blacklist"
+        "search_ip_address": "Check if this IP address is blocked by Threat shield blacklist",
+        "search_ip_or_domain": "Check if this IP or domain is blocked by Threat shield blacklist"
     }
 }

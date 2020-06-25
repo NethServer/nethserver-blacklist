@@ -72,7 +72,7 @@
         <p v-else>-</p>
         <button
           type="button"
-          class="btn btn-default mg-top-sm"
+          class="btn btn-default"
           :disabled="!isLoaded.updateIp || !ipConfig.url"
           @click="updateIpBlacklist()"
         >{{ $t('dashboard.check_for_updates') }}</button>
@@ -84,7 +84,7 @@
         <p v-else>-</p>
         <button
           type="button"
-          class="btn btn-default mg-top-sm"
+          class="btn btn-default"
           :disabled="!isLoaded.updateDns || !dnsConfig.url"
           @click="updateDnsBlacklist()"
         >{{ $t('dashboard.check_for_updates') }}</button>
@@ -330,7 +330,8 @@ export default {
         ["nethserver-blacklist/dashboard/read"],
         {
           action: "statistics",
-          type: "ipsets"
+          type: "ipsets",
+          limit: 10
         },
         null,
         function(success) {
@@ -372,7 +373,7 @@ export default {
         {
           action: "statistics",
           type: "dnss",
-          positions: 10
+          limit: 10
         },
         null,
         function(success) {
@@ -436,7 +437,7 @@ export default {
       };
       pieChartConfig.size = {
         width: 350,
-        height: 220
+        height: 250
       };
       pieChartConfig.color = {
         pattern: [

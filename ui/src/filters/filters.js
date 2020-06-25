@@ -145,6 +145,11 @@ var Filters = {
         }
 
         return Math.round(value * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
+    },
+    prettyString: function(value) {
+        let s = value.replace(/_/g, " ");
+        // capitalize
+        return s && s.toString().charAt(0).toUpperCase() + s.toString().slice(1);
     }
 };
 

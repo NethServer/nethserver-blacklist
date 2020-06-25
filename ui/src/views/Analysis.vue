@@ -23,49 +23,96 @@
 <template>
   <div>
     <h2>{{$t('analysis.title')}}</h2>
-    <!-- IP search -->
-    <h3>{{$t('analysis.ip_search_title')}}</h3>
-    <form class="form-horizontal" v-on:submit.prevent="validateSearchIp()">
-      <div :class="['form-group', {'has-error': error.ipSearch}]">
-        <label class="col-sm-2 control-label" for="ip-search">
-          {{$t('analysis.ip_address')}}
-          <doc-info :placement="'bottom'" :chapter="'search_ip_address'" :inline="true"></doc-info>
-        </label>
-        <div class="col-sm-3">
-          <input type="text" v-model="ipSearch" id="ip-search" ref="ipSearch" class="form-control" />
-          <span
-            v-if="error.ipSearch"
-            class="help-block"
-          >{{$t('validation.ip_search_' + error.ipSearch)}}</span>
+    <div v-show="!isLoaded.config" class="spinner form-spinner-loader mg-left-sm"></div>
+    <div v-show="isLoaded.config">
+      <h3 v-if="!dnsConfig.status">{{$t('analysis.check_ip_address')}}</h3>
+      <h3 v-else>{{$t('analysis.check_ip_address_or_domain')}}</h3>
+      <!-- IP search -->
+      <form
+        v-show="!dnsConfig.status"
+        class="form-horizontal"
+        v-on:submit.prevent="validateSearchIp()"
+      >
+        <div :class="['form-group', {'has-error': error.ipSearch}]">
+          <label class="col-sm-2 control-label" for="ip-search">
+            {{$t('analysis.ip_address')}}
+            <doc-info :placement="'bottom'" :chapter="'search_ip_address'" :inline="true"></doc-info>
+          </label>
+          <div class="col-sm-3">
+            <input
+              type="text"
+              v-model="ipSearch"
+              id="ip-search"
+              ref="ipSearch"
+              class="form-control"
+            />
+            <span
+              v-if="error.ipSearch"
+              class="help-block"
+            >{{$t('validation.ip_search_' + error.ipSearch)}}</span>
+          </div>
         </div>
-      </div>
-      <!-- check button -->
-      <div class="form-group">
-        <label class="col-sm-2 control-label label-loader">
-          <div
-            v-if="!isLoaded.search"
-            class="spinner spinner-sm form-spinner-loader adjust-top-loader"
-          ></div>
-        </label>
-        <span class="col-sm-2">
-          <button
-            class="btn btn-default"
-            type="submit"
-            :disabled="!isLoaded.search || !isLoaded.categories"
-          >{{$t('analysis.check')}}</button>
-        </span>
-      </div>
-    </form>
-    <div v-if="showIpSearchResult" class="alert alert-info alert-dismissable">
-      <span class="pficon pficon-info"></span>
-      {{$t('analysis.ip_address')}}
-      <b>{{ ipSearchCompleted }}</b>
-      <span v-if="ipSearchResult">
-        {{ $t('analysis.ip_blocked_from_category') }}
-        <b>{{ ipSearchResult }}</b>
-      </span>
-      <span v-if="!ipSearchResult">&nbsp;{{ $t('analysis.ip_not_blocked') }}</span>
+        <!-- check IP button -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label label-loader">
+            <div
+              v-if="!isLoaded.search"
+              class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+            ></div>
+          </label>
+          <span class="col-sm-2">
+            <button
+              class="btn btn-default"
+              type="submit"
+              :disabled="!isLoaded.search || !isLoaded.categories"
+            >{{$t('analysis.check')}}</button>
+          </span>
+        </div>
+      </form>
+      <!-- IP or domain search -->
+      <form
+        v-show="dnsConfig.status"
+        class="form-horizontal"
+        v-on:submit.prevent="validateSearchIpOrDomain()"
+      >
+        <div :class="['form-group', {'has-error': error.ipOrDomainSearch}]">
+          <label class="col-sm-2 control-label" for="ip-domain-search">
+            {{$t('analysis.ip_or_domain')}}
+            <doc-info :placement="'bottom'" :chapter="'search_ip_or_domain'" :inline="true"></doc-info>
+          </label>
+          <div class="col-sm-3">
+            <input
+              type="text"
+              v-model="ipOrDomainSearch"
+              id="ip-domain-search"
+              ref="ipOrDomainSearch"
+              class="form-control"
+            />
+            <span
+              v-if="error.ipOrDomainSearch"
+              class="help-block"
+            >{{$t('validation.ip_or_domain_search_' + error.ipOrDomainSearch)}}</span>
+          </div>
+        </div>
+        <!-- check IP or domain button -->
+        <div class="form-group">
+          <label class="col-sm-2 control-label label-loader">
+            <div
+              v-if="!isLoaded.search"
+              class="spinner spinner-sm form-spinner-loader adjust-top-loader"
+            ></div>
+          </label>
+          <span class="col-sm-2">
+            <button
+              class="btn btn-default"
+              type="submit"
+              :disabled="!isLoaded.search || !isLoaded.categories"
+            >{{$t('analysis.check')}}</button>
+          </span>
+        </div>
+      </form>
     </div>
+
     <h3>{{$t('analysis.logs')}}</h3>
     <form class="form-horizontal" v-on:submit.prevent="getLogs()">
       <!-- filter -->
@@ -131,13 +178,13 @@
               <span>{{props.row.time}}</span>
             </span>
             <span v-if="props.column.field == 'interface'">
-              <span>{{props.row.interface}}</span>
+              <span>{{props.row.interface || '-'}}</span>
             </span>
             <span v-if="props.column.field == 'source'">
               <span
                 data-toggle="tooltip"
                 data-placement="top"
-                :title="$t('analysis.ip_search_title')"
+                :title="$t('analysis.check_ip_address')"
               >
                 <a @click="ipAddressClicked(props.row.source)">{{props.row.source}}</a>
               </span>
@@ -146,22 +193,118 @@
               <span
                 data-toggle="tooltip"
                 data-placement="top"
-                :title="$t('analysis.ip_search_title')"
+                :title="$t('analysis.check_ip_address')"
               >
                 <a @click="ipAddressClicked(props.row.dest)">{{props.row.dest}}</a>
               </span>
             </span>
             <span v-if="props.column.field == 'protocol'">
-              <span>{{props.row.protocol}}</span>
+              <span>{{props.row.protocol || '-'}}</span>
             </span>
             <span v-if="props.column.field == 'dest_port'">
-              <span>{{props.row.dest_port}}</span>
+              <span>{{props.row.dest_port || '-'}}</span>
             </span>
             <span v-if="props.column.field == 'dest_service'">
-              <span>{{props.row.dest_service ? props.row.dest_service : '-'}}</span>
+              <span>{{props.row.dest_service || '-'}}</span>
             </span>
           </template>
         </vue-good-table>
+      </div>
+    </div>
+    <!-- search result modal -->
+    <div class="modal" id="search-result-modal" tabindex="-1" role="dialog" data-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4
+              class="modal-title"
+            >{{searchResult.ipAddress ? $t('analysis.check_ip_address') : $t('analysis.check_domain')}}</h4>
+          </div>
+          <form class="form-horizontal">
+            <div class="modal-body">
+              <!-- banner -->
+              <div class="alert alert-info alert-dismissable">
+                <span class="pficon pficon-info"></span>
+                <span v-if="searchResult.ipAddress">
+                  {{$t('analysis.ip_address')}}
+                  <span
+                    v-if="searchResult.categories && searchResult.categories.length"
+                  >{{ $t('analysis.is_blocked_by_ip_blacklist') }}</span>
+                  <span v-else>{{ $t('analysis.is_not_blocked_by_ip_blacklist') }}</span>
+                </span>
+                <span v-else>
+                  {{$t('analysis.domain')}}
+                  <span
+                    v-if="searchResult.categories && searchResult.categories.length"
+                  >{{ $t('analysis.is_blocked_by_dns_blacklist') }}</span>
+                  <span v-else>{{ $t('analysis.is_not_blocked_by_dns_blacklist') }}</span>
+                </span>
+              </div>
+              <!-- search results form -->
+              <div class="form-group">
+                <label
+                  class="col-sm-3 control-label"
+                >{{searchResult.ipAddress ? $t('analysis.ip_address') : $t('analysis.domain')}}</label>
+                <div class="col-sm-9">
+                  <span
+                    class="search-result"
+                  >{{searchResult.ipAddress ? searchResult.ipAddress : searchResult.domain}}</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label">{{$t('analysis.blocked_by')}}</label>
+                <div class="col-sm-9">
+                  <span class="search-result">
+                    <span
+                      v-if="searchResult.categories && searchResult.categories.length"
+                      class="search-result"
+                    >
+                      <div
+                        v-for="(category, index) in searchResult.categories"
+                        v-bind:key="index"
+                      >{{$te('categories.' + category) ? $t('categories.' + category) : category | prettyString}}</div>
+                    </span>
+                    <span v-else>{{ $t('analysis.no_category') }}</span>
+                  </span>
+                </div>
+              </div>
+              <div v-if="searchResult.domain">
+                <div class="form-group">
+                  <label class="col-sm-3 control-label">{{$t('analysis.blocked_requests')}}</label>
+                  <div class="col-sm-9">
+                    <span class="search-result">{{searchResult.blockedRequests}}</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label">{{$t('analysis.total_requests')}}</label>
+                  <div class="col-sm-9">
+                    <span class="search-result">{{searchResult.totalRequests}}</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 control-label">{{$t('analysis.requested_by')}}</label>
+                  <div class="col-sm-9">
+                    <span class="search-result">
+                      <span
+                        v-if="searchResult.clients && searchResult.clients.length"
+                        class="search-result"
+                      >
+                        <div
+                          v-for="(client, index) in searchResult.clients"
+                          v-bind:key="index"
+                        >{{client}}</div>
+                      </span>
+                      <span v-else>{{ $t('analysis.no_client') }}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer no-mg-top">
+              <button class="btn btn-primary" type="button" data-dismiss="modal">{{$t('close')}}</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -171,6 +314,7 @@
 export default {
   name: "Analysis",
   mounted() {
+    this.getIpConfig();
     this.getCategories();
     this.getLogs();
   },
@@ -182,7 +326,14 @@ export default {
       isLoaded: {
         search: true,
         categories: false,
-        logs: false
+        logs: false,
+        config: false
+      },
+      ipConfig: {
+        status: false
+      },
+      dnsConfig: {
+        status: false
       },
       tableLangsTexts: this.tableLangs(),
       columns: [
@@ -228,9 +379,8 @@ export default {
         ipSearch: false
       },
       ipSearch: "",
-      ipSearchCompleted: "",
-      ipSearchResult: "",
-      showIpSearchResult: false,
+      ipOrDomainSearch: "",
+      searchResult: {},
       allCategories: []
     };
   },
@@ -263,7 +413,6 @@ export default {
     validateSearchIp() {
       this.error.ipSearch = false;
       this.isLoaded.search = false;
-      this.showIpSearchResult = false;
       this.ipSearch = this.ipSearch.trim();
 
       var validateObj = {
@@ -284,6 +433,48 @@ export default {
         }
       );
     },
+    validateSearchIpOrDomain() {
+      this.error.ipOrDomainSearch = false;
+      this.isLoaded.search = false;
+      this.ipOrDomainSearch = this.ipOrDomainSearch.trim();
+
+      var validateObj = {
+        action: "search",
+        ipOrDomain: this.ipOrDomainSearch
+      };
+
+      const context = this;
+      nethserver.exec(
+        ["nethserver-blacklist/analysis/validate"],
+        validateObj,
+        null,
+        function(success) {
+          try {
+            success = JSON.parse(success);
+          } catch (e) {
+            console.error(e);
+          }
+          const ipOrDomain = success.ipOrDomain;
+
+          if (ipOrDomain === "ip") {
+            context.searchIp({
+              action: "search",
+              ipAddress: validateObj.ipOrDomain
+            });
+          } else if (ipOrDomain === "domain") {
+            context.searchDomain({
+              action: "search",
+              domain: validateObj.ipOrDomain
+            });
+          } else {
+            console.error("Invalid ipOrDomain result: " + ipOrDomain);
+          }
+        },
+        function(error, data) {
+          context.validationError(error, data);
+        }
+      );
+    },
     validationError(error, data) {
       this.isLoaded.search = true;
       const errorData = JSON.parse(data);
@@ -295,6 +486,9 @@ export default {
         if (param === "ipAddress") {
           this.error.ipSearch = attr.error;
           this.$refs.ipSearch.focus();
+        } else if (param === "ipOrDomain") {
+          this.error.ipOrDomainSearch = attr.error;
+          this.$refs.ipOrDomainSearch.focus();
         }
       }
     },
@@ -304,7 +498,7 @@ export default {
       }, 300);
     },
     ipAddressClicked(ipAddress) {
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
       this.ipSearch = ipAddress;
       this.validateSearchIp();
     },
@@ -316,21 +510,27 @@ export default {
         null,
         function(success) {
           success = JSON.parse(success);
+          context.searchResult = success.searchResult;
+          $("#search-result-modal").modal("show");
           context.isLoaded.search = true;
-          context.ipSearchResult = success.searchResult;
-          context.ipSearchCompleted = context.ipSearch;
-
-          if (context.ipSearchResult) {
-            // retrieve category name
-            var categoryFound = context.allCategories.find(category => {
-              return category.id === context.ipSearchResult;
-            });
-
-            if (categoryFound) {
-              context.ipSearchResult = categoryFound.name;
-            }
-          }
-          context.showIpSearchResult = true;
+        },
+        function(error, data) {
+          console.error(error);
+          context.isLoaded.search = true;
+        }
+      );
+    },
+    searchDomain(validateObj) {
+      var context = this;
+      nethserver.exec(
+        ["nethserver-blacklist/analysis/read"],
+        validateObj,
+        null,
+        function(success) {
+          success = JSON.parse(success);
+          context.searchResult = success.searchResult;
+          $("#search-result-modal").modal("show");
+          context.isLoaded.search = true;
         },
         function(error, data) {
           console.error(error);
@@ -360,10 +560,73 @@ export default {
           console.error(error);
         }
       );
+    },
+    getIpConfig() {
+      const context = this;
+      context.isLoaded.config = false;
+      nethserver.exec(
+        ["nethserver-blacklist/ipsets/read"],
+        {
+          action: "configuration"
+        },
+        null,
+        function(success) {
+          try {
+            success = JSON.parse(success);
+          } catch (e) {
+            console.error(e);
+          }
+          const props = success.configuration.props;
+
+          if (props.status === "enabled") {
+            context.ipConfig.status = true;
+          } else {
+            context.ipConfig.status = false;
+          }
+          context.getDnsConfig();
+        },
+        function(error) {
+          console.error(error);
+          context.isLoaded.config = true;
+        }
+      );
+    },
+    getDnsConfig() {
+      const context = this;
+      nethserver.exec(
+        ["nethserver-blacklist/dnss/read"],
+        {
+          action: "configuration"
+        },
+        null,
+        function(success) {
+          try {
+            success = JSON.parse(success);
+          } catch (e) {
+            console.error(e);
+          }
+          const props = success.configuration.props;
+
+          if (props.status === "enabled") {
+            context.dnsConfig.status = true;
+          } else {
+            context.dnsConfig.status = false;
+          }
+          context.isLoaded.config = true;
+        },
+        function(error) {
+          console.error(error);
+          context.isLoaded.config = true;
+        }
+      );
     }
   }
 };
 </script>
 
 <style scoped>
+.search-result {
+  display: inline-block;
+  padding-top: 2px;
+}
 </style>

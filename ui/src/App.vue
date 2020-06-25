@@ -164,10 +164,6 @@ export default {
   box-shadow: none;
 }
 
-.mg-left-md {
-  margin-left: 2rem;
-}
-
 .adjust-top-loader {
   top: 0;
 }
@@ -188,6 +184,10 @@ export default {
   margin-left: 1rem;
 }
 
+.mg-left-md {
+  margin-left: 2rem;
+}
+
 .mg-right-sm {
   margin-right: 1rem !important;
 }
@@ -202,10 +202,6 @@ export default {
 
 .mg-top-md {
   margin-top: 2rem;
-}
-
-.mg-top-sm {
-  margin-bottom: 1rem;
 }
 
 .pad-top-xs {
@@ -234,5 +230,9 @@ export default {
 
 .bg-hotspot {
     background-color: #008888;
+}
+
+h3 {
+  margin-top: 3rem;
 }
 </style>
