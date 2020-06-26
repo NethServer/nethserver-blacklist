@@ -21,7 +21,10 @@
 #
 
 #
-# Find today most blocked source hosts. First argument must be a day of month with this format: "Feb 25"
+# Find today most blocked source hosts.
 #
 
-/usr/bin/grep "$1" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/grep -oE -e 'SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}' | /usr/bin/cut -d'=' -f2 | /usr/bin/sort | /usr/bin/uniq -c | /usr/bin/sort -rn | /usr/bin/head -n 5
+day=$1      # day of month with this format: "Feb 25"
+lines=$2    # maximum number of entries to output
+
+/usr/bin/grep "$day" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/grep -oE -e 'SRC=([0-9]{1,3}[\.]){3}[0-9]{1,3}' | /usr/bin/cut -d'=' -f2 | /usr/bin/sort | /usr/bin/uniq -c | /usr/bin/sort -rn | /usr/bin/head -n "$lines"

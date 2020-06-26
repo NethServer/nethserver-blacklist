@@ -25,12 +25,12 @@
 
         if ($zones ne '') {
             foreach my $zone (split(",",$zones)) {
-                my $zone = substr($zone, 0, 5); #truncate zone name to 5 chars
                 if ($zone eq 'green') { # rename green to loc
                     $zone = 'loc';
                 } elsif ($zone eq 'hotspot') { # rename hotspot to hotsp
                     $zone = 'hotsp';
                 }
+                my $zone = substr($zone, 0, 5); # truncate zone name to 5 chars
 
                 $OUT .= "?COMMENT Transparent DNS proxy on $zone for port 53\n";
                 $OUT .= "REDIRECT\t$zone$bypass_src_str\t$port\tudp\t53\n";

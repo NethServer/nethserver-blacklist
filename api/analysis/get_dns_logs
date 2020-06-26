@@ -21,21 +21,9 @@
 #
 
 #
-# Download the blacklists for the first time
+# Get recent DNS blacklist logs.
 #
-event=$1    # name of the event (not used)
-type=$2     # blacklist type (ipsets or dnss)
 
-if [[ "$type" == "ipsets" ]]; then
-    conf="blacklist"
-elif [[ "$type" == "dnss" ]]; then
-    conf="ftl"
-else
-    echo "Invalid blacklist type: $type"
-    exit 1
-fi
+lines=$1    # maximum number of lines to output
 
-status=$(/sbin/e-smith/config getprop $conf status)
-if [[ "$status" == "enabled" ]]; then
-    exec /usr/share/nethserver-blacklist/download $type
-fi
+/usr/bin/echo ">getallqueries" | /usr/bin/nc 127.0.0.1 4711 | /usr/bin/tail -n "$(( $lines + 2 ))" | /usr/bin/head -n "$lines"

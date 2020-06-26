@@ -31,10 +31,16 @@
                 </a>
             </router-link>
             <li class="li-empty"></li>
-            <router-link tag="li" to="/settings" active-class="active" class="list-group-item">
+            <router-link tag="li" to="/ip_blacklist" active-class="active" class="list-group-item">
                 <a>
                     <span class="fa fa-gear"></span>
-                    <span class="list-group-item-value">{{$t('settings.title')}}</span>
+                    <span class="list-group-item-value">{{$t('ip_blacklist.title')}}</span>
+                </a>
+            </router-link>
+            <router-link tag="li" to="/dns_blacklist" active-class="active" class="list-group-item">
+                <a>
+                    <span class="fa fa-gear"></span>
+                    <span class="list-group-item-value">{{$t('dns_blacklist.title')}}</span>
                 </a>
             </router-link>
             <li class="li-empty"></li>
@@ -44,13 +50,13 @@
                     <span class="list-group-item-value">{{$t('analysis.title')}}</span>
                 </a>
             </router-link>
-            <li class="li-empty"></li>
             <router-link tag="li" to="/logs" active-class="active" class="list-group-item">
                 <a>
                     <span class="fa fa-list"></span>
                     <span class="list-group-item-value">{{$t('logs.title')}}</span>
                 </a>
             </router-link>
+            <li class="li-empty"></li>
             <router-link tag="li" to="/about" active-class="active" class="list-group-item">
                 <a>
                     <span class="fa fa-info"></span>
@@ -158,24 +164,32 @@ export default {
   box-shadow: none;
 }
 
-.mg-left-md {
-  margin-left: 2rem;
-}
-
-.padding-30 {
-  padding: 30px;
-}
-
 .adjust-top-loader {
   top: 0;
+}
+
+.no-margin {
+  margin: 0;
+}
+
+.no-mg-bottom {
+  margin-bottom: 0;
+}
+
+.mg-bottom-md {
+  margin-bottom: 2rem;
 }
 
 .mg-left-sm {
   margin-left: 1rem;
 }
 
+.mg-left-md {
+  margin-left: 2rem;
+}
+
 .mg-right-sm {
-  margin-right: 1rem;
+  margin-right: 1rem !important;
 }
 
 .mg-right-md {
@@ -190,11 +204,35 @@ export default {
   margin-top: 2rem;
 }
 
-.mg-top-sm {
-  margin-bottom: 1rem;
+.pad-top-xs {
+  padding-top: 0.5rem !important;
 }
 
 .right {
   float: right;
+}
+
+.bg-green {
+    background-color: #3f9c35;
+}
+
+.bg-red {
+    background-color: #cc0000;
+}
+
+.bg-orange {
+    background-color: #ec7a08;
+}
+
+.bg-blue {
+    background-color: #0088ce;
+}
+
+.bg-hotspot {
+    background-color: #008888;
+}
+
+h3 {
+  margin-top: 3rem;
 }
 </style>
