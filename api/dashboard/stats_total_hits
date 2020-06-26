@@ -21,7 +21,9 @@
 #
 
 #
-# Find today total blocked accesses. First argument must be a day of month with this format: "Feb 25"
+# Find today total blocked accesses.
 #
 
-/usr/bin/grep "$1" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/wc -l
+day=$1  # day of month with this format: "Feb 25"
+
+/usr/bin/grep "$day" /var/log/firewall.log | /usr/bin/grep blacklst | /usr/bin/wc -l

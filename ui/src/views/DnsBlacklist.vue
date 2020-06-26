@@ -192,7 +192,7 @@
         <label class="gray mg-right-md">
           <span
             v-if="enabledCategories.length && config.status"
-          >{{ enabledCategories.length }} {{$t('settings.categories_enabled')}}</span>
+          >{{ enabledCategories.length }} {{enabledCategories.length > 1 ? $t('settings.categories_enabled') : $t('settings.category_enabled')}}</span>
           <span v-else>{{$t('settings.no_category_enabled')}}</span>
         </label>
         <button
@@ -964,5 +964,6 @@ export default {
   border: 1px solid #bbb;
   border-radius: 1px;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  margin-bottom: 0;
 }
 </style>

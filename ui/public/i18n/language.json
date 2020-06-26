@@ -59,6 +59,7 @@
         "select_all_categories": "Select all categories",
         "deselect_all_categories": "Deselect all categories",
         "categories_enabled": "enabled categories",
+        "category_enabled": "enabled category",
         "no_category_enabled": "No enabled category"
     },
     "categories": {
@@ -126,7 +127,8 @@
         "logs": "Logs",
         "record_type": "Record type",
         "query_status": "Query status",
-        "cannot_search": "Enable IP blacklist and/or DNS blacklist to check if an IP address or a domain is blocked"
+        "cannot_search": "Enable IP blacklist and/or DNS blacklist to check if an IP address or a domain is blocked",
+        "clear": "Clear"
     },
     "logs": {
         "title": "Logs",

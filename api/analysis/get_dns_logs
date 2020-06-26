@@ -21,8 +21,9 @@
 #
 
 #
-# Get recent DNS blacklist logs. First argument is the maximum number of lines to retrieve
+# Get recent DNS blacklist logs.
 #
 
-lines=$1
+lines=$1    # maximum number of lines to output
+
 /usr/bin/echo ">getallqueries" | /usr/bin/nc 127.0.0.1 4711 | /usr/bin/tail -n "$(( $lines + 2 ))" | /usr/bin/head -n "$lines"

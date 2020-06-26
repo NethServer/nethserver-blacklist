@@ -11,6 +11,7 @@ Cmnd_Alias NSAPI_NETHSERVER_BLACKLIST = \
     /usr/libexec/nethserver/api/nethserver-blacklist/ipsets/validate, \
     /usr/libexec/nethserver/api/nethserver-blacklist/dnss/read, \
     /usr/libexec/nethserver/api/nethserver-blacklist/dnss/update, \
-    /usr/libexec/nethserver/api/nethserver-blacklist/dnss/validate
+    /usr/libexec/nethserver/api/nethserver-blacklist/dnss/validate, \
+    /usr/libexec/nethserver/api/nethserver-firewall-base/rules/read
 
 Defaults!NSAPI_NETHSERVER_BLACKLIST !requiretty

@@ -169,7 +169,7 @@
         <label class="gray mg-right-md">
           <span
             v-if="enabledCategories.length && config.status"
-          >{{ enabledCategories.length }} {{$t('settings.categories_enabled')}}</span>
+          >{{ enabledCategories.length }} {{enabledCategories.length > 1 ? $t('settings.categories_enabled') : $t('settings.category_enabled')}}</span>
           <span v-else>{{$t('settings.no_category_enabled')}}</span>
         </label>
         <button

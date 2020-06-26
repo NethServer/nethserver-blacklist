@@ -68,7 +68,7 @@
           </label>
           <span class="col-sm-2">
             <button
-              class="btn btn-default"
+              class="btn btn-primary"
               type="submit"
               :disabled="!isLoaded.search"
             >{{$t('analysis.check')}}</button>
@@ -110,7 +110,7 @@
           </label>
           <span class="col-sm-2">
             <button
-              class="btn btn-default"
+              class="btn btn-primary"
               type="submit"
               :disabled="!isLoaded.search"
             >{{$t('analysis.check')}}</button>
@@ -153,7 +153,7 @@
           </label>
           <span class="col-sm-2">
             <button
-              class="btn btn-default"
+              class="btn btn-primary"
               type="submit"
               :disabled="!isLoaded.search || (!ipConfig.status && !dnsConfig.status)"
             >{{$t('analysis.check')}}</button>
@@ -161,18 +161,19 @@
         </div>
       </form>
     </div>
-
+    <!-- logs -->
     <h3>{{$t('analysis.recent_logs')}}</h3>
     <form class="form-horizontal" v-on:submit.prevent="getLogs()">
       <!-- logs type -->
       <div class="form-group">
-        <label class="col-sm-2 control-label" for="searchFilter">{{$t('analysis.logs')}}</label>
+        <label class="col-sm-2 control-label" for="logs-type">{{$t('analysis.logs')}}</label>
         <div class="col-sm-3">
           <select
             class="combobox form-control"
             v-model="logsType"
             :disabled="!dnsConfig.status"
             @change="getLogs()"
+            id="logs-type"
           >
             <option value="ip">{{$t('ip_blacklist.title')}}</option>
             <option v-show="dnsConfig.status" value="dns">{{$t('dns_blacklist.title')}}</option>
@@ -185,6 +186,14 @@
         <div class="col-sm-3">
           <input type="text" v-model="searchFilter" id="searchFilter" class="form-control" />
         </div>
+        <!-- clear filter -->
+        <span class="col-sm-2 search-filter-btn">
+          <button
+            class="btn btn-default"
+            type="button"
+            @click="clearFilter()"
+          >{{$t('analysis.clear')}}</button>
+        </span>
       </div>
       <!-- number of lines -->
       <div class="form-group">
@@ -206,7 +215,7 @@
         <label class="col-sm-2 control-label label-loader"></label>
         <span class="col-sm-2">
           <button
-            class="btn btn-default"
+            class="btn btn-primary"
             type="submit"
             :disabled="!isLoaded.logs"
           >{{$t('analysis.search_logs')}}</button>
@@ -341,82 +350,81 @@
           </div>
           <form class="form-horizontal">
             <div class="modal-body">
-              <!-- result banner -->
-              <div
-                :class="['alert', 'alert-dismissable', searchResult.categories && searchResult.categories.length ? 'alert-warning' : 'alert-info' ]"
-              >
-                <span
-                  :class="['pficon', searchResult.categories && searchResult.categories.length ? 'pficon-warning-triangle-o' : 'pficon-info']"
-                ></span>
-                <span v-if="searchResult.ipAddress">
-                  {{$t('analysis.ip_address')}}
+              <div v-show="!isLoaded.searchModal" class="spinner form-spinner-loader mg-left-sm"></div>
+              <div v-show="isLoaded.searchModal">
+                <!-- result banner -->
+                <div
+                  :class="['alert', 'alert-dismissable', searchResult.categories && searchResult.categories.length ? 'alert-warning' : 'alert-info' ]"
+                >
                   <span
-                    v-if="searchResult.categories && searchResult.categories.length"
-                  >{{ $t('analysis.is_blocked_by_ip_blacklist') }}</span>
-                  <span v-else>{{ $t('analysis.is_not_blocked_by_ip_blacklist') }}</span>
-                </span>
-                <span v-else>
-                  {{$t('analysis.domain')}}
-                  <span
-                    v-if="searchResult.categories && searchResult.categories.length"
-                  >{{ $t('analysis.is_blocked_by_dns_blacklist') }}</span>
-                  <span v-else>{{ $t('analysis.is_not_blocked_by_dns_blacklist') }}</span>
-                </span>
-              </div>
-              <!-- search results form -->
-              <div class="form-group">
-                <label
-                  class="col-sm-3 control-label"
-                >{{searchResult.ipAddress ? $t('analysis.ip_address') : $t('analysis.domain')}}</label>
-                <div class="col-sm-9">
-                  <span
-                    class="search-result"
-                  >{{searchResult.ipAddress ? searchResult.ipAddress : searchResult.domain}}</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-3 control-label">{{$t('analysis.blocked_by')}}</label>
-                <div class="col-sm-9">
-                  <span class="search-result">
+                    :class="['pficon', searchResult.categories && searchResult.categories.length ? 'pficon-warning-triangle-o' : 'pficon-info']"
+                  ></span>
+                  <span v-if="searchResult.ipAddress">
+                    {{$t('analysis.ip_address')}}
                     <span
                       v-if="searchResult.categories && searchResult.categories.length"
-                    >
-                      <div
-                        v-for="(category, index) in searchResult.categories"
-                        v-bind:key="index"
-                      >{{$te('categories.' + category) ? $t('categories.' + category) : category | prettyString}}</div>
-                    </span>
-                    <span v-else>{{ $t('analysis.no_category') }}</span>
+                    >{{ $t('analysis.is_blocked_by_ip_blacklist') }}</span>
+                    <span v-else>{{ $t('analysis.is_not_blocked_by_ip_blacklist') }}</span>
+                  </span>
+                  <span v-else>
+                    {{$t('analysis.domain')}}
+                    <span
+                      v-if="searchResult.categories && searchResult.categories.length"
+                    >{{ $t('analysis.is_blocked_by_dns_blacklist') }}</span>
+                    <span v-else>{{ $t('analysis.is_not_blocked_by_dns_blacklist') }}</span>
                   </span>
                 </div>
-              </div>
-              <div v-if="searchResult.domain">
+                <!-- search results form -->
                 <div class="form-group">
-                  <label class="col-sm-3 control-label">{{$t('analysis.blocked_requests')}}</label>
+                  <label
+                    class="col-sm-3 control-label"
+                  >{{searchResult.ipAddress ? $t('analysis.ip_address') : $t('analysis.domain')}}</label>
                   <div class="col-sm-9">
-                    <span class="search-result">{{searchResult.blockedRequests}}</span>
+                    <span
+                      class="search-result"
+                    >{{searchResult.ipAddress ? searchResult.ipAddress : searchResult.domain}}</span>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="col-sm-3 control-label">{{$t('analysis.total_requests')}}</label>
+                  <label class="col-sm-3 control-label">{{$t('analysis.blocked_by')}}</label>
                   <div class="col-sm-9">
-                    <span class="search-result">{{searchResult.totalRequests}}</span>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-3 control-label">{{$t('analysis.requested_by')}}</label>
-                  <div class="col-sm-5 clients-list">
                     <span class="search-result">
-                      <span
-                        v-if="searchResult.clients && searchResult.clients.length"
-                      >
+                      <span v-if="searchResult.categories && searchResult.categories.length">
                         <div
-                          v-for="(client, index) in searchResult.clients"
+                          v-for="(category, index) in searchResult.categories"
                           v-bind:key="index"
-                        >{{client}}</div>
+                        >{{$te('categories.' + category) ? $t('categories.' + category) : category | prettyString}}</div>
                       </span>
-                      <span v-else>{{ $t('analysis.no_client') }}</span>
+                      <span v-else>{{ $t('analysis.no_category') }}</span>
                     </span>
+                  </div>
+                </div>
+                <div v-if="searchResult.domain">
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label">{{$t('analysis.blocked_requests')}}</label>
+                    <div class="col-sm-9">
+                      <span class="search-result">{{searchResult.blockedRequests}}</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label">{{$t('analysis.total_requests')}}</label>
+                    <div class="col-sm-9">
+                      <span class="search-result">{{searchResult.totalRequests}}</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label">{{$t('analysis.requested_by')}}</label>
+                    <div class="col-sm-5 clients-list">
+                      <span class="search-result">
+                        <span v-if="searchResult.clients && searchResult.clients.length">
+                          <div
+                            v-for="(client, index) in searchResult.clients"
+                            v-bind:key="index"
+                          >{{client}}</div>
+                        </span>
+                        <span v-else>{{ $t('analysis.no_client') }}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -446,7 +454,8 @@ export default {
       isLoaded: {
         search: true,
         logs: false,
-        config: false
+        config: false,
+        searchModal: false
       },
       ipConfig: {
         status: false
@@ -693,6 +702,8 @@ export default {
     },
     searchIp(validateObj) {
       var context = this;
+      context.isLoaded.searchModal = false;
+      $("#search-result-modal").modal("show");
       nethserver.exec(
         ["nethserver-blacklist/analysis/read"],
         validateObj,
@@ -700,8 +711,8 @@ export default {
         function(success) {
           success = JSON.parse(success);
           context.searchResult = success.searchResult;
-          $("#search-result-modal").modal("show");
           context.isLoaded.search = true;
+          context.isLoaded.searchModal = true;
         },
         function(error, data) {
           console.error(error);
@@ -711,6 +722,8 @@ export default {
     },
     searchDomain(validateObj) {
       var context = this;
+      context.isLoaded.searchModal = false;
+      $("#search-result-modal").modal("show");
       nethserver.exec(
         ["nethserver-blacklist/analysis/read"],
         validateObj,
@@ -720,6 +733,7 @@ export default {
           context.searchResult = success.searchResult;
           $("#search-result-modal").modal("show");
           context.isLoaded.search = true;
+          context.isLoaded.searchModal = true;
         },
         function(error, data) {
           console.error(error);
@@ -792,6 +806,10 @@ export default {
           context.isLoaded.config = true;
         }
       );
+    },
+    clearFilter() {
+      this.searchFilter = "";
+      this.getLogs();
     }
   }
 };
@@ -805,6 +823,10 @@ export default {
 
 .clients-list {
   max-height: 9rem;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+.search-filter-btn {
+  padding-left: 0;
 }
 </style>
