@@ -98,7 +98,9 @@
     <div v-if="isLoaded.ipStats">
       <div>
         <div class="stats-container card-pf-utilization-details">
-          <span class="card-pf-utilization-card-details-count">{{ ipStats.totalHits }}</span>
+          <span class="card-pf-utilization-card-details-count" :title="stats.totalHits">
+            {{ stats.totalHits | humanFormat }}
+          </span>
           <span class="card-pf-utilization-card-details-description">
             <span
               class="card-pf-utilization-card-details-line-2 stats-text"
