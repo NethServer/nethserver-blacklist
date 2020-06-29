@@ -21,7 +21,7 @@
 #
 
 #
-# Find today total blocked accesses.
+# Find today's total blocked accesses.
 #
 
 day=$1  # day of month with this format: "Feb 25"

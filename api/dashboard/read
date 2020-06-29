@@ -50,13 +50,13 @@ def get_stats_ip(limit):
     today = "{} {}".format(month, day)
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    # today total threats blocked
+    # today's total threats blocked
     process = subprocess.Popen(
         [dir_path + "/stats_total_hits", today], stdout=subprocess.PIPE)
     output, error = process.communicate()
     stats_total = output.strip(" \"\n")
 
-    # today source hosts blocked
+    # today's source hosts blocked
     process = subprocess.Popen(
         [dir_path + "/stats_src_hosts", today, str(limit)], stdout=subprocess.PIPE)
     output, error = process.communicate()
@@ -68,7 +68,7 @@ def get_stats_ip(limit):
             tokens = line.split()
             stats_src_hosts.append([tokens[1], int(tokens[0])])
 
-    # today destination hosts blocked
+    # today's destination hosts blocked
     process = subprocess.Popen(
         [dir_path + "/stats_dst_hosts", today, str(limit)], stdout=subprocess.PIPE)
     output, error = process.communicate()
