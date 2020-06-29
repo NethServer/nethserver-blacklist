@@ -89,7 +89,7 @@
     "dns_blacklist": {
         "title": "DNS blacklist",
         "enable_dns_blacklist": "Enable DNS blacklist",
-        "zones": "Proxied zones",
+        "zones": "Enable DNS proxy for",
         "proxy_bypass": "Proxy bypass"
     },
     "analysis": {
