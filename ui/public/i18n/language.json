@@ -163,7 +163,7 @@
         "search_ip_address": "Check if this IP address is blocked by IP blacklist",
         "search_domain": "Check if this domain is blocked by DNS blacklist",
         "search_ip_or_domain": "Check if this IP or domain is blocked by IP or DNS blacklist",
-        "whitelist_dns": "DNS requests from this sources are always allowed",
+        "whitelist_dns": "DNS requests from this sources will not be redirected to the DNS proxy",
         "dns_zones": "Network interfaces with these roles will be proxied"
     }
 }
