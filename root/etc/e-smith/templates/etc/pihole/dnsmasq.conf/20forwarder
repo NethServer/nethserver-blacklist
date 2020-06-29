@@ -1,0 +1,12 @@
+#
+# 20forwarder
+#
+{
+    $OUT .= "# Forward queries for local domain to dnsmasq\n";
+    $OUT .= "server=/$DomainName/127.0.0.1\n";
+
+    $OUT .= "# Original upstream servers\n";
+    foreach (split ',', $dns{NameServers}) {
+        $OUT .= "server=$_\n";
+    }
+}

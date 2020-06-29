@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/perl
 
 #
 # Copyright (C) 2020 Nethesis S.r.l.
@@ -20,8 +20,24 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-#
-# Get recent logs. First argument is the maximum number of lines to retrieve
-#
 
-/usr/bin/grep blacklst /var/log/firewall.log | /usr/bin/tail -n "$1"
+use strict;
+use esmith::ConfigDB;
+
+my $dbName = shift;
+my $key = shift;
+my $db = esmith::ConfigDB->open_ro();
+my $bypass = $db->get_prop("ftl", "Bypass");
+my @list = split(/,/, $bypass);
+
+foreach (@list) {
+    if ($_ =~ /;/) {
+        my ($type, $name) = split(/;/, $_);
+        if ($name eq $key) {
+            print "$dbName:$key is used in DNS blacklist\n";
+            exit(1);
+        }
+    }
+}
+
+exit(0);

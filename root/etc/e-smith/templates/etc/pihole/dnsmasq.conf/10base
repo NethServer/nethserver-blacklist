@@ -1,0 +1,6 @@
+#
+# 10base
+#
+bogus-priv
+no-resolv
+port={{$ftl{'UDPPorts'}}}

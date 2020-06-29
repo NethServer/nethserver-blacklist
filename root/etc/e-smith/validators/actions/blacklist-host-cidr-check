@@ -34,7 +34,7 @@ foreach (@list) {
     if ($_ =~ /;/) {
         my ($type, $name) = split(/;/, $_);
         if ($name eq $key) {
-            print "$dbName:$key is used in blacklist application\n";
+            print "$dbName:$key is used in IP blacklist\n";
             exit(1);
         }
     }

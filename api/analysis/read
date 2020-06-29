@@ -40,10 +40,55 @@ def filter_match(filter, items):
     return False
 
 
-def get_logs(filter, lines):
+def get_dns_logs(filter, lines):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     process = subprocess.Popen(
-        [dir_path + "/get_logs", str(lines)], stdout=subprocess.PIPE)
+        [dir_path + "/get_dns_logs", str(lines)], stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    log_lines = output.strip(" \n").split("\n")
+    logs = []
+
+    for line in log_lines:
+        if line:
+            match = re.search(
+                r"^([0-9]+)\s(\S+)\s(\S+)\s(\S+)\s([0-9]+).+$", line)
+            if match:
+                log_time = match.group(1)
+                record_type = match.group(2)
+                dest = match.group(3)
+                source = match.group(4)
+                query_status = match.group(5)
+
+                if int(query_status) == 0:
+                    query_status_desc = "Unknown"
+                elif int(query_status) == 1:
+                    query_status_desc = "Blocked"
+                elif int(query_status) == 2:
+                    query_status_desc = "Allowed (forwarded)"
+                elif int(query_status) == 3:
+                    query_status_desc = "Allowed (cached)"
+                elif 4 <= int(query_status) <= 11:
+                    query_status_desc = "Blocked"
+                else:
+                    query_status_desc = "-"
+
+                # check if filter is contained in extracted data only
+                if filter_match(filter, [log_time, record_type, dest, source, query_status, query_status_desc]):
+                    log = {
+                        "seconds": int(log_time),
+                        "recordType": record_type,
+                        "dest": dest,
+                        "source": source,
+                        "queryStatus": {"code": int(query_status), "description": query_status_desc}
+                    }
+                    logs.insert(0, log)  # most recent logs first
+    return logs
+
+
+def get_ip_logs(filter, lines):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    process = subprocess.Popen(
+        [dir_path + "/get_ip_logs", str(lines)], stdout=subprocess.PIPE)
     output, error = process.communicate()
     log_lines = output.strip(" \n").split("\n")
     logs = []
@@ -51,30 +96,32 @@ def get_logs(filter, lines):
     for line in log_lines:
         if (line):
             match = re.search(
-                r"^([\w]+\s+[0-9]+\s+[0-9]+\:[0-9]+\:[0-9]+).+IN=(\S+).+SRC=(\S+).+DST=(\S+).+PROTO=(\S+).+DPT=([0-9]+)", line)
+                r"^([\w]+\s+[0-9]+\s+[0-9]+\:[0-9]+\:[0-9]+).+IN=(\S*).+SRC=(\S+).+DST=(\S+).+PROTO=(\S+).+", line)
             if match:
                 log_time = match.group(1)
                 date = str(datetime.datetime.now().year) + ' ' + log_time
                 date_format = '%Y %b %d %H:%M:%S'
-                seconds = int(time.mktime(time.strptime(date, date_format))) # unix epoch
+                seconds = int(time.mktime(time.strptime(
+                    date, date_format)))  # unix epoch
 
                 interface = match.group(2)
                 source = match.group(3)
                 dest = match.group(4)
                 protocol = match.group(5)
-                dest_port = match.group(6)
+                dest_port = ""
+                dest_service = ""
 
-                # retrieve service name
-                process = subprocess.Popen(
-                    ['/usr/bin/grep', "\s" + dest_port + "/" + protocol.lower(), '/etc/services'], stdout=subprocess.PIPE)
-                output, error = process.communicate()
-                tokens = output.strip(" \n").split()
+                if (re.search(r"^.+DPT=([0-9]+)", line)):
+                    dest_port = match.group(1)
 
-                if tokens:
-                    dest_service = tokens[0]
-                else:
-                    # service name not found
-                    dest_service = ""
+                    # retrieve service name
+                    process = subprocess.Popen(
+                        ['/usr/bin/grep', "\s" + dest_port + "/" + protocol.lower(), '/etc/services'], stdout=subprocess.PIPE)
+                    output, error = process.communicate()
+                    tokens = output.strip(" \n").split()
+
+                    if tokens:
+                        dest_service = tokens[0]
 
                 # check if filter is contained in extracted data only
                 if filter_match(filter, [log_time, interface, source, dest, protocol, dest_port, dest_service]):
@@ -85,7 +132,7 @@ def get_logs(filter, lines):
                         "source": source,
                         "dest": dest,
                         "protocol": protocol,
-                        "dest_port": int(dest_port),
+                        "dest_port": int(dest_port) if dest_port else None,
                         "dest_service": dest_service
                     }
                     logs.insert(0, log)  # most recent logs first
@@ -98,7 +145,79 @@ def search_ip_address(ip_address):
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output.strip(" \"\n").replace("bl-", "")
-    return output
+
+    if output:
+        categories = [output]
+    else:
+        categories = []
+
+    search_result = {'ipAddress': ip_address, 'categories': categories}
+    return search_result
+
+
+def pihole_telnet_domain(domain):
+    p1 = subprocess.Popen(['/usr/bin/echo', '>domain {}'.format(domain)],
+                          stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['/usr/bin/nc', '127.0.0.1', '4711'],
+                          stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    output = p2.communicate()[0]
+    domain_info = {'clients': [], 'totalRequests': 0, 'blockedRequests': 0}
+    reading_clients = False
+
+    for line in output.split('\n'):
+        if line:
+            if 'unknown' in line and not reading_clients:
+                # no info available
+                break
+
+            if 'Client status' in line:
+                # start reading IP addresses of clients
+                reading_clients = True
+                continue
+
+            if not reading_clients:
+                # total requests
+                match = re.search(r"^Total: ([0-9]+)$", line)
+                if match:
+                    domain_info['totalRequests'] = int(match.group(1))
+                    continue
+
+                # blocked requests
+                match = re.search(r"^Blocked: ([0-9]+)$", line)
+                if match:
+                    domain_info['blockedRequests'] = int(match.group(1))
+                    continue
+            else:
+                # IP address of client
+                match = re.search(r"^ (\S+) \(ID.+$", line)
+                if match:
+                    client = match.group(1)
+                    domain_info['clients'].append(client)
+                    continue
+
+    return domain_info
+
+
+def categories_blocking_domain(domain):
+    process = subprocess.Popen(['/usr/bin/sqlite3', '/etc/pihole/gravity.db',
+                                'select adlist.comment from gravity, adlist where gravity.adlist_id = adlist.id and gravity.domain = "{}" and adlist.enabled = 1'.format(domain)], stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+    categories = []
+
+    for line in output.split('\n'):
+        if line:
+            categories.append(line)
+
+    return categories
+
+
+def search_domain(domain):
+    search_result = pihole_telnet_domain(domain)
+    categories = categories_blocking_domain(domain)
+    search_result['categories'] = categories
+    search_result['domain'] = domain
+    return search_result
 
 
 try:
@@ -109,14 +228,28 @@ try:
     if action == 'logs':
         filter = input_json["filter"]
         lines = input_json["lines"]
-        logs = get_logs(filter, lines)
+        type = input_json["type"]
+
+        if type == 'ip':
+            logs = get_ip_logs(filter, lines)
+        else:
+            logs = get_dns_logs(filter, lines)
+
         output = simplejson.dumps({'logs': logs})
-        print (output)
+        print(output)
     elif action == 'search':
-        ip_address = input_json["ipAddress"]
-        search_result = search_ip_address(ip_address)
-        output = simplejson.dumps({'searchResult': search_result})
-        print (output)
+        if 'ipAddress' in input_json:
+            ip_address = input_json['ipAddress']
+            search_result = search_ip_address(ip_address)
+            output = simplejson.dumps({'searchResult': search_result})
+            print(output)
+        elif 'domain' in input_json:
+            domain = input_json['domain']
+            search_result = search_domain(domain)
+            output = simplejson.dumps({'searchResult': search_result})
+            print(output)
+        else:
+            raise ValueError("invalid input")
     else:
         raise ValueError(
             "action must be one of 'logs' or 'search'")

@@ -2,19 +2,19 @@
 #
 # Copyright (C) 2016 Nethesis S.r.l.
 # http://www.nethesis.it - support@nethesis.it
-# 
+#
 # This script is part of NethServer.
-# 
+#
 # NethServer is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License,
 # or any later version.
-# 
+#
 # NethServer is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with NethServer.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -33,24 +33,34 @@ event_templates($event,
 
 event_actions($event, 'initialize-default-databases' => '00');
 
+event_services($event, qw(
+    ftl restart
+));
+
 
 #--------------------------------------------------
 # actions for nethserver-blacklist-save event
 #--------------------------------------------------
 
 $event = "nethserver-blacklist-save";
-event_templates($event,
-    "/etc/cron.d/nethserver-blacklist"
-);
+event_templates($event, qw(
+    /etc/cron.d/nethserver-blacklist
+    /etc/pihole/dnsmasq.conf
+));
 
 event_actions($event, qw(
-   nethserver-blacklist-conf 20
-   firewall-adjust 30
+    nethserver-blacklist-conf 20
+    firewall-adjust 30
+));
+
+event_services($event, qw(
+    ftl restart
 ));
 
 validator_actions($_, qw(
-                  blacklist-host-cidr-check 40
+    blacklist-host-cidr-check 40
+    blacklist-dns-host-cidr-check 50
 )) foreach (qw(
-   fwobject-host-delete
-   fwobject-cidr-delete
+    fwobject-host-delete
+    fwobject-cidr-delete
 ));

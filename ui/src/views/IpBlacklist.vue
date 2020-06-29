@@ -22,7 +22,7 @@
 
 <template>
   <div>
-    <h2>{{$t('settings.title')}}</h2>
+    <h2 class="mg-bottom-md">{{$t('ip_blacklist.title')}}</h2>
     <!-- error message -->
     <div v-if="errorMessage" class="alert alert-danger alert-dismissable">
       <button type="button" class="close" @click="closeErrorMessage()" aria-label="Close">
@@ -36,7 +36,10 @@
       <form class="form-horizontal" v-on:submit.prevent="saveSettings(true)">
         <!-- status -->
         <div class="form-group">
-          <label class="col-sm-2 control-label" for="blacklist-status">{{$t('enabled')}}</label>
+          <label
+            class="col-sm-2 control-label"
+            for="blacklist-status"
+          >{{$t('ip_blacklist.enable_ip_blacklist')}}</label>
           <div class="col-sm-2">
             <input
               type="checkbox"
@@ -116,6 +119,7 @@
                           :onInputChange="filterWhitelistElem"
                           :onItemSelected="selectWhitelistElem"
                           ref="whitelistSuggestions"
+                          :disabled="!config.status"
                         >
                           <div slot="item" slot-scope="props" class="single-item">
                             <span>
@@ -160,113 +164,132 @@
       </form>
     </div>
     <!-- categories -->
-    <div class="right">
-      <label class="gray mg-right-md">
-        <span v-if="enabledCategories.length && config.status">
-          {{ enabledCategories.length }} {{$t('settings.categories_enabled')}}
-        </span>
-        <span v-else>
-          {{$t('settings.no_category_enabled')}}
-        </span>
-      </label>
-      <button
-        class="btn btn-default mg-right-xs"
-        type="button"
-        @click="toggleSelectionAllCategories()"
-        :disabled="!config.status || !isLoaded.categories"
-      >{{$t(selectedCategories.length < allCategories.length ? 'settings.select_all_categories' : 'settings.deselect_all_categories')}}</button>
-      <button
-        class="btn btn-primary mg-right-xs"
-        type="button"
-        :disabled="selectedCategories.length == 0 || disabledSelectedCategories.length == 0 || !isLoaded.categories || !config.status"
-        @click="enableCategories()"
-      >{{$t('enable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
-      <button
-        class="btn btn-danger"
-        type="button"
-        :disabled="selectedCategories.length == 0 || enabledSelectedCategories.length == 0 || !isLoaded.categories || !config.status"
-        @click="disableCategories()"
-      >{{$t('disable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
-    </div>
-    <h3>{{$t('settings.categories')}}</h3>
-    <div v-show="!isLoaded.categories" class="spinner form-spinner-loader mg-left-sm"></div>
-    <div v-show="isLoaded.categories">
-      <div class="col-sm-12">
-        <vue-good-table
-          :columns="columns"
-          :rows="allCategories"
-          :lineNumbers="false"
-          :sort-options="{
-            enabled: true,
-            initialSortBy: {field: 'enabled', type: 'desc'},
-          }"
-          :search-options="{
-            enabled: true,
-            placeholder: tableLangsTexts.globalSearchPlaceholder
-          }"
-          :pagination-options="{
-            enabled: true,
-            rowsPerPageLabel: tableLangsTexts.rowsPerPageText,
-            nextLabel: tableLangsTexts.nextText,
-            prevLabel: tableLangsTexts.prevText,
-            ofLabel: tableLangsTexts.ofText,
-            dropdownAllowAll: false,
-          }"
-          styleClass="table responsive vgt2"
-          :row-style-class="rowStyleClassFn"
-        >
-          <template slot="table-row" slot-scope="props">
-            <span v-if="props.column.field == 'select'">
-              <label :for="'checkbox_' + props.row.id" class="checkbox-label">
-                <input
-                  type="checkbox"
-                  v-model="props.row.selected"
-                  :id="'checkbox_' + props.row.id"
-                  @change="toggleSelectCategory(props.row)"
-                  class="form-control"
-                  :disabled="!config.status"
-                />
-              </label>
-            </span>
-            <span v-else-if="props.column.field == 'name'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                <span :title="$te(props.row.id + '_description') ? $t(props.row.id + '_description') : ''">
-                  <span class="semi-bold">{{$t(props.row.id)}}</span>
-                </span>
-              </label>
-            </span>
-            <span v-else-if="props.column.field == 'enabled'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                <span
-                  :class="['category-status-icon', 'pficon', (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
-                ></span>
-                <span :class="{'green': (props.row.enabled && config.status)}">
-                  {{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}
-                </span>
-              </label>
-            </span>
-            <span v-else-if="props.column.field == 'confidence'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                <span :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
-                  {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)}]"
+    <div>
+      <div class="right">
+        <label class="gray mg-right-md">
+          <span
+            v-if="enabledCategories.length && config.status"
+          >{{ enabledCategories.length }} {{enabledCategories.length > 1 ? $t('settings.categories_enabled') : $t('settings.category_enabled')}}</span>
+          <span v-else>{{$t('settings.no_category_enabled')}}</span>
+        </label>
+        <button
+          class="btn btn-default mg-right-xs"
+          type="button"
+          @click="toggleSelectionAllCategories()"
+          :disabled="!config.status || !isLoaded.categories"
+        >{{$t(selectedCategories.length < allCategories.length ? 'settings.select_all_categories' : 'settings.deselect_all_categories')}}</button>
+        <button
+          class="btn btn-primary mg-right-xs"
+          type="button"
+          :disabled="selectedCategories.length == 0 || disabledSelectedCategories.length == 0 || !isLoaded.categories || !config.status"
+          @click="enableCategories()"
+        >{{$t('enable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
+        <button
+          class="btn btn-danger"
+          type="button"
+          :disabled="selectedCategories.length == 0 || enabledSelectedCategories.length == 0 || !isLoaded.categories || !config.status"
+          @click="disableCategories()"
+        >{{$t('disable')}} {{ selectedCategories.length }} {{$t('settings.categories_low')}}</button>
+      </div>
+      <h3>{{$t('settings.categories')}}</h3>
+      <div v-show="!isLoaded.categories" class="spinner form-spinner-loader mg-left-sm"></div>
+      <div v-show="isLoaded.categories">
+        <div class="col-sm-12">
+          <vue-good-table
+            :columns="columns"
+            :rows="allCategories"
+            :lineNumbers="false"
+            :sort-options="{
+              enabled: true,
+              initialSortBy: [
+                {field: 'enabled', type: 'desc'},
+                {field: 'confidence', type: 'desc'}
+              ],
+            }"
+            :search-options="{
+              enabled: true,
+              placeholder: tableLangsTexts.globalSearchPlaceholder
+            }"
+            :pagination-options="{
+              enabled: true,
+              rowsPerPageLabel: tableLangsTexts.rowsPerPageText,
+              nextLabel: tableLangsTexts.nextText,
+              prevLabel: tableLangsTexts.prevText,
+              ofLabel: tableLangsTexts.ofText,
+              dropdownAllowAll: false,
+            }"
+            styleClass="table responsive vgt2"
+            :row-style-class="rowStyleClassFn"
+          >
+            <template slot="table-row" slot-scope="props">
+              <span v-if="props.column.field == 'select'">
+                <label :for="'checkbox_' + props.row.id" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    v-model="props.row.selected"
+                    :id="'checkbox_' + props.row.id"
+                    @change="toggleSelectCategory(props.row)"
+                    class="form-control"
+                    :disabled="!config.status"
+                  />
+                </label>
+              </span>
+              <span v-else-if="props.column.field == 'name'">
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
                 >
-                  <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
-                  <span v-else>{{ $t('unknown') }}</span>
-                </span>
-              </label>
-            </span>
-            <span v-else-if="props.column.field == 'type'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                {{(props.row.type ? props.row.type : '-') | capitalize}}
-              </label>
-            </span>
-            <span v-else-if="props.column.field == 'maintainer'">
-              <label :for="'checkbox_' + props.row.id" :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]">
-                {{props.row.maintainer ? props.row.maintainer : '-'}}
-              </label>
-            </span>
-          </template>
-        </vue-good-table>
+                  <span
+                    :title="$te('categories.' + props.row.id + '_description') ? $t('categories.' + props.row.id + '_description') : ''"
+                  >
+                    <span
+                      class="semi-bold"
+                    >{{$te('categories.' + props.row.id) ? $t('categories.' + props.row.id) : props.row.id | prettyString}}</span>
+                  </span>
+                </label>
+              </span>
+              <span v-else-if="props.column.field == 'enabled'">
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >
+                  <span
+                    :class="['category-status-icon', 'pficon', (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
+                  ></span>
+                  <span
+                    :class="{'green': (props.row.enabled && config.status)}"
+                  >{{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}</span>
+                </label>
+              </span>
+              <span v-else-if="props.column.field == 'confidence'">
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >
+                  <span
+                    :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
+                    {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)}]"
+                  >
+                    <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
+                    <span v-else>{{ $t('unknown') }}</span>
+                  </span>
+                </label>
+              </span>
+              <span v-else-if="props.column.field == 'type'">
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >{{(props.row.type ? props.row.type : '-') | capitalize}}</label>
+              </span>
+              <span v-else-if="props.column.field == 'maintainer'">
+                <label
+                  :for="'checkbox_' + props.row.id"
+                  :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
+                >{{props.row.maintainer ? props.row.maintainer : '-'}}</label>
+              </span>
+            </template>
+          </vue-good-table>
+        </div>
       </div>
     </div>
   </div>
@@ -274,7 +297,7 @@
 
 <script>
 export default {
-  name: "Settings",
+  name: "IpBlacklist",
   mounted() {
     this.getBlacklistData();
   },
@@ -372,12 +395,11 @@ export default {
     },
     getBlacklistData() {
       this.getFirewallUiInstalled();
-      this.getConfig();
     },
     getFirewallUiInstalled() {
       const context = this;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/ipsets/read"],
         {
           action: "firewall-ui-installed"
         },
@@ -389,7 +411,8 @@ export default {
 
             if (context.firewallUiInstalled) {
               context.getHosts();
-              context.getCIDRSubs();
+            } else {
+              context.getConfig();
             }
           } catch (e) {
             console.error(e);
@@ -404,7 +427,7 @@ export default {
       const context = this;
       context.isLoaded.config = false;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/ipsets/read"],
         {
           action: "configuration"
         },
@@ -465,7 +488,7 @@ export default {
       const context = this;
       context.isLoaded.categories = false;
       nethserver.exec(
-        ["nethserver-blacklist/settings/read"],
+        ["nethserver-blacklist/ipsets/read"],
         {
           action: "categories"
         },
@@ -545,7 +568,7 @@ export default {
 
       const context = this;
       nethserver.exec(
-        ["nethserver-blacklist/settings/validate"],
+        ["nethserver-blacklist/ipsets/validate"],
         validateObj,
         null,
         function(success) {
@@ -565,7 +588,7 @@ export default {
       );
       const context = this;
       nethserver.exec(
-        ["nethserver-blacklist/settings/update"],
+        ["nethserver-blacklist/ipsets/update"],
         validateObj,
         function(stream) {
           console.info("blacklist-configuration-update", stream);
@@ -658,6 +681,7 @@ export default {
             i.typeId = "host";
             return i;
           });
+          context.getCIDRSubs();
         },
         function(error) {
           console.error(error);
@@ -774,7 +798,7 @@ export default {
     },
     rowStyleClassFn(row) {
       return row.selected ? "active" : "";
-    }
+    },
   }
 };
 </script>

@@ -60,7 +60,7 @@ if [ "$current_url" != "$url" ]; then
     fi
 fi
 
-/sbin/e-smith/signal-event -j nethserver-blacklist-save
+/sbin/e-smith/signal-event -j nethserver-blacklist-save ipsets
 if [ $? -gt 0 ]; then
     error "EventFailed" "See /var/log/messages"
 fi

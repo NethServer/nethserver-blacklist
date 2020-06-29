@@ -1,0 +1,127 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2020 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+DNSDIR=/usr/share/nethserver-blacklist/dnss
+STATUS=$(/sbin/e-smith/config getprop ftl status)
+CATEGORIES=$(/sbin/e-smith/config getprop ftl Categories | tr , ' ')
+
+SQLITE=/usr/bin/sqlite3
+GRAVITY_DB=/etc/pihole/gravity.db
+GRAVITY_DB_SCHEMA=/etc/pihole/gravity.db.schema.sql
+
+RELOAD=0
+DEBUG=0
+
+function exit_error {
+    >&2 echo "[ERROR] $@"
+    exit 1
+}
+
+function debug {
+    if [ $DEBUG -eq 1 ]; then
+        echo "[DEBUG] $@"
+    fi
+}
+
+function warning {
+    >&2 echo "[WARNING] $@"
+}
+
+options=$(getopt -o ld --long reload --long debug  -- "$@")
+[ $? -eq 0 ] || {
+    exit_error "Incorrect options provided"
+}
+eval set -- "$options"
+while true; do
+    case "$1" in
+    --reload|-l)
+        RELOAD=1
+        ;;
+    --debug|-d)
+        DEBUG=1
+        ;;
+    --)
+        shift
+        break
+        ;;
+    esac
+    shift
+done
+
+# Cleanup all blacklist dns
+debug "Clean current gravity db and initialize again"
+/usr/bin/rm -rf $GRAVITY_DB && $SQLITE $GRAVITY_DB < $GRAVITY_DB_SCHEMA
+
+# Exit if status of ftl is disabled
+if [ "$STATUS" == "disabled" ]; then
+    debug "Black list dns disabled, exit after clean"
+    exit 0
+fi
+
+# define category id
+ID=1
+
+# loop for each enabled categories
+debug "Loop enabled categories"
+for category in $CATEGORIES; do
+    # compose file name
+    file="$DNSDIR/$category.dns"
+    debug "Get .dns file: $file"
+
+    # create target import file
+    target="$(mktemp -p "/tmp" --suffix=".gravity")"
+    debug "Create temporary file in: $target"
+
+    # write to file
+    sed '/^#/d' $file | sed "s/$/,$ID/" > $target
+    debug "Write parsed domains in CSV format"
+
+    # load category in gravity db
+    debug "Load $category inside gravity db"
+    $SQLITE $GRAVITY_DB \
+        "INSERT INTO 'adlist' VALUES($ID, 'file://$file', 1, date(), date(), '$category')"
+
+    # load domains in gravity db
+    debug "Load domains of $category inside gravity db"
+    output=$( { printf ".timeout 30000\\n.mode csv\\n.import \"%s\" gravity\\n" "$target" | $SQLITE "$GRAVITY_DB"; } 2>&1 )
+    status="$?"
+
+    if [[ "${status}" -ne 0 ]]; then
+        exit_error "Unable to load blacklist domains gravity table in database"
+    fi
+
+    # increment category id
+    ID=$((ID+1))
+
+    # remove temporary file
+    debug "Remove $target file"
+    /usr/bin/rm -rf $target
+done
+
+# update domains count
+count=$($SQLITE $GRAVITY_DB 'SELECT COUNT(DISTINCT domain) FROM vw_gravity;')
+$SQLITE "$GRAVITY_DB" "INSERT OR REPLACE INTO info (property, value) VALUES ('gravity_count', $count);"
+debug "Update total domains in gravity db. There are $count domains"
+
+# restart ftl and load new domains
+debug "Restart ftl"
+/usr/bin/systemctl restart ftl

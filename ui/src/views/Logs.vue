@@ -31,9 +31,9 @@
             class="combobox form-control"
             v-model="view.path"
             v-on:change="handleLogs()"
-            disabled
           >
             <option selected>/var/log/firewall.log</option>
+            <option>/var/log/pihole-FTL.log</option>
           </select>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-8">
@@ -145,7 +145,9 @@ export default {
         {
           action: this.view.follow ? "follow" : "dump",
           lines: this.view.follow ? null : this.view.lines,
-          filter: this.view.filter
+          mode: "file",
+          filter: this.view.filter,
+          paths: [this.view.path]
         },
         this.view.follow
           ? function(stream) {
@@ -173,7 +175,7 @@ export default {
           context.logsContent = error;
         },
         true,
-        "nethserver-blacklist/logs/execute"
+        context.view.path === "/var/log/firewall.log" ? "nethserver-blacklist/logs/execute" : null
       );
     }
   }

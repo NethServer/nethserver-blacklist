@@ -9,15 +9,15 @@
     "release": {
         "version": "_RELEASE_"
     },
-    "tags": ["blacklist", "ipset", "nethserver", "threat", "shield"],
+    "tags": ["blacklist", "ipset", "dns", "proxy", "nethserver", "threat", "shield"],
     "license": "GPL-3.0",
     "bugs": {
         "url": "https://github.com/NethServer/dev/issues"
     },
     "author": {
-        "name": "Andrea Leardini",
+        "name": "Andrea Leardini, Giacomo Sanchietti, Edoardo Spadoni",
         "url": "https://github.com/NethServer/nethserver-blacklist",
-        "email": "andrea.leardini@nethesis.it"
+        "email": "andrea.leardini@nethesis.it, giacomo.sanchietti@nethesis.it, edoardo.spadoni@nethesis.it"
     },
     "icon": "logo.png"
 }

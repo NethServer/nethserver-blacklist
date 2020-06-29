@@ -29,8 +29,8 @@ import re
 from datetime import datetime
 
 
-def get_last_updated():
-    dir = "/usr/share/nethserver-blacklist/ipsets"
+def get_last_updated(blacklist_type):
+    dir = "/usr/share/nethserver-blacklist/{}".format(blacklist_type)
     bash_command = '/usr/bin/git --git-dir={}/.git/ --work-tree={} log -n1 --format="%at"'.format(
         dir, dir)
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
@@ -38,7 +38,7 @@ def get_last_updated():
     return output.strip(" \"\n")
 
 
-def get_stats():
+def get_stats_ip(limit):
     now = datetime.now()
     month = now.strftime("%b")
     day = now.strftime("%-d")
@@ -50,15 +50,15 @@ def get_stats():
     today = "{} {}".format(month, day)
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    # today total threats blocked
+    # today's total threats blocked
     process = subprocess.Popen(
         [dir_path + "/stats_total_hits", today], stdout=subprocess.PIPE)
     output, error = process.communicate()
     stats_total = output.strip(" \"\n")
 
-    # today source hosts blocked
+    # today's source hosts blocked
     process = subprocess.Popen(
-        [dir_path + "/stats_src_hosts", today], stdout=subprocess.PIPE)
+        [dir_path + "/stats_src_hosts", today, str(limit)], stdout=subprocess.PIPE)
     output, error = process.communicate()
     output_lines = output.strip("\n").split("\n")
     stats_src_hosts = []
@@ -68,9 +68,9 @@ def get_stats():
             tokens = line.split()
             stats_src_hosts.append([tokens[1], int(tokens[0])])
 
-    # today destination hosts blocked
+    # today's destination hosts blocked
     process = subprocess.Popen(
-        [dir_path + "/stats_dst_hosts", today], stdout=subprocess.PIPE)
+        [dir_path + "/stats_dst_hosts", today, str(limit)], stdout=subprocess.PIPE)
     output, error = process.communicate()
     output_lines = output.strip("\n").split("\n")
     stats_dst_hosts = []
@@ -87,22 +87,109 @@ def get_stats():
     }
 
 
+def pihole_telnet_stats():
+    p1 = subprocess.Popen(['/usr/bin/echo', '>stats'],
+                          stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['/usr/bin/nc', '127.0.0.1', '4711'],
+                          stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    output = p2.communicate()[0]
+    stats = {}
+
+    for line in output.split('\n'):
+        tokens = line.split()
+
+        if len(tokens) == 2:
+            stat_name = tokens[0]
+            stat_value = tokens[1]
+
+            try:
+                stat_value = float(stat_value)
+            except ValueError:
+                pass
+
+            stats[stat_name] = stat_value
+
+    return stats
+
+
+def pihole_telnet_rank(command, limit):
+    p1 = subprocess.Popen(['/usr/bin/echo', '>{} ({})'.format(command, limit)],
+                          stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['/usr/bin/nc', '127.0.0.1', '4711'],
+                          stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    output = p2.communicate()[0]
+    rank = []
+
+    for line in output.split('\n'):
+        tokens = line.split()
+
+        if len(tokens) == 3:
+            hits = int(tokens[1])
+            domain = tokens[2]
+            entry = [domain, hits]
+            rank.append(entry)
+
+    return rank
+
+
+def pihole_telnet_clients(limit):
+    p1 = subprocess.Popen(['/usr/bin/echo', '>top-clients ({})'.format(limit)],
+                          stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['/usr/bin/nc', '127.0.0.1', '4711'],
+                          stdin=p1.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    output = p2.communicate()[0]
+    rank = []
+
+    for line in output.split('\n'):
+        tokens = line.split()
+
+        if len(tokens) >= 3:
+            client = []
+            hits = int(tokens[1])
+            host = tokens[3] if len(tokens) == 4 else tokens[2]
+            client = [host, hits]
+            rank.append(client)
+
+    return rank
+
+
+def get_stats_dns(limit):
+    general_stats = pihole_telnet_stats()
+    top_domains = pihole_telnet_rank('top-domains', limit)
+    top_ads = pihole_telnet_rank('top-ads', limit)
+    top_clients = pihole_telnet_clients(limit)
+    return {'general': general_stats, 'topDomains': top_domains, 'topAds': top_ads, 'topClients': top_clients}
+
+
 try:
     line = fileinput.input()[0].rstrip()
     input_json = simplejson.loads(line)
     action = input_json["action"]
+    blacklist_type = input_json["type"]
 
     if action == 'last-updated':
-        last_updated = get_last_updated()
+        last_updated = get_last_updated(blacklist_type)
         output = simplejson.dumps({'lastUpdated': last_updated})
-        print (output)
+        print(output)
     elif action == 'statistics':
-        stats = get_stats()
+        limit = input_json["limit"]
+
+        if blacklist_type == 'ipsets':
+            stats = get_stats_ip(limit)
+        elif blacklist_type == 'dnss':
+            stats = get_stats_dns(limit)
+        else:
+            raise ValueError(
+                "invalid blacklist type")
+
         output = simplejson.dumps({'statistics': stats})
-        print (output)
+        print(output)
     else:
         raise ValueError(
             "action must be one of 'last-updated' or 'statistics'")
-except Exception, e:
+except Exception as e:
     print simplejson.dumps({'error': "%s" % e})
     sys.exit(1)
