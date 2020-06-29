@@ -35,9 +35,9 @@
         "ip_blacklist_disabled": "IP blacklist is disabled",
         "dns_blacklist_enabled": "DNS blacklist is enabled",
         "dns_blacklist_disabled": "DNS blacklist is disabled",
-        "top_clients": "Most active clients",
-        "top_blocked_domains": "Most blocked domains",
-        "top_domains": "Most requested domains",
+        "top_clients": "Top 10 most active clients",
+        "top_blocked_domains": "Top 10 most blocked domains",
+        "top_domains": "Top 10 most requested domains",
         "today_threats_percentage": "threats ratio",
         "today_dns_queries": "DNS queries today"
     },
