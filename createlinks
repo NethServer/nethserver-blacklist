@@ -59,6 +59,7 @@ event_services($event, qw(
 
 validator_actions($_, qw(
     blacklist-host-cidr-check 40
+    blacklist-dns-host-cidr-check 50
 )) foreach (qw(
     fwobject-host-delete
     fwobject-cidr-delete

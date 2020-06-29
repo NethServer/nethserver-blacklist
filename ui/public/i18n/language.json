@@ -89,7 +89,8 @@
     "dns_blacklist": {
         "title": "DNS blacklist",
         "enable_dns_blacklist": "Enable DNS blacklist",
-        "zones": "Proxied zones"
+        "zones": "Proxied zones",
+        "proxy_bypass": "Proxy bypass"
     },
     "analysis": {
         "title": "Analysis",
@@ -148,6 +149,9 @@
         "whitelist_duplicates": "Duplicated whitelist entry",
         "whitelist_invalid": "Invalid whitelist entry",
         "whitelist_invalid_type": "Whitelist must be a list",
+        "bypass_duplicates": "Duplicated bypass entry",
+        "bypass_invalid": "Invalid bypass entry",
+        "bypass_invalid_type": "Bypass must be a list",
         "url_empty": "Download URL is mandatory",
         "url_invalid": "Invalid URL",
         "url_invalid_git_repo": "Invalid git repository",

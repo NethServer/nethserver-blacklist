@@ -93,7 +93,7 @@
         <!-- whitelist -->
         <div :class="['form-group', {'has-error': error.whitelist}]">
           <label class="col-sm-2 control-label">
-            {{$t('settings.whitelist')}}
+            {{$t('dns_blacklist.proxy_bypass')}}
             <doc-info :placement="'top'" :chapter="'whitelist_dns'" :inline="true"></doc-info>
           </label>
           <div class="col-sm-5">
@@ -166,7 +166,7 @@
                         <span
                           v-if="error.whitelist"
                           class="help-block font-size-normal"
-                        >{{$t('validation.whitelist_' + error.whitelist)}}</span>
+                        >{{$t('validation.bypass_' + error.whitelist)}}</span>
                       </div>
                     </div>
                   </div>

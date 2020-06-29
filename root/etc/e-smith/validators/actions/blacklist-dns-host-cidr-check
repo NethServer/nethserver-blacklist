@@ -27,14 +27,14 @@ use esmith::ConfigDB;
 my $dbName = shift;
 my $key = shift;
 my $db = esmith::ConfigDB->open_ro();
-my $whitelist = $db->get_prop("blacklist", "Whitelist");
-my @list = split(/,/, $whitelist);
+my $bypass = $db->get_prop("ftl", "Bypass");
+my @list = split(/,/, $bypass);
 
 foreach (@list) {
     if ($_ =~ /;/) {
         my ($type, $name) = split(/;/, $_);
         if ($name eq $key) {
-            print "$dbName:$key is used in IP blacklist\n";
+            print "$dbName:$key is used in DNS blacklist\n";
             exit(1);
         }
     }
