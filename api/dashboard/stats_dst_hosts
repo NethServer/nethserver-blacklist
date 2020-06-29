@@ -21,7 +21,7 @@
 #
 
 #
-# Find today most blocked destination hosts.
+# Find today's most blocked destination hosts.
 #
 
 day=$1      # day of month with this format: "Feb 25"
