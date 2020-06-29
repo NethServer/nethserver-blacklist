@@ -69,10 +69,13 @@
         </div>
         <!-- roles -->
         <div class="form-group">
-          <label class="col-sm-2 control-label pad-top-xs">{{$t('dns_blacklist.zones')}}</label>
+          <label class="col-sm-2 control-label pad-top-xs">
+            {{$t('dns_blacklist.zones')}}
+            <doc-info :placement="'top'" :chapter="'dns_zones'" :inline="true"></doc-info>
+          </label>
           <div class="col-sm-5">
-            <div id="pf-list-standard" class="list-group list-view-pf roles-list">
-              <div v-for="(roleSelected, role) in roles" class="list-group-item">
+            <div id="pf-list-standard" class="list-view-pf">
+              <div v-for="(roleSelected, role) in roles" class="list-group-item role">
                 <input
                   type="checkbox"
                   v-model="roles[role]"
@@ -960,10 +963,11 @@ export default {
   height: 100%;
 }
 
-.roles-list {
-  border: 1px solid #bbb;
-  border-radius: 1px;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  margin-bottom: 0;
+.list-group-item.role {
+  padding-left: 0;
+}
+
+.list-group-item.role:hover {
+  background: none;
 }
 </style>

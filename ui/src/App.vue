@@ -33,13 +33,13 @@
             <li class="li-empty"></li>
             <router-link tag="li" to="/ip_blacklist" active-class="active" class="list-group-item">
                 <a>
-                    <span class="fa fa-gear"></span>
+                    <span class="fa fa-ban"></span>
                     <span class="list-group-item-value">{{$t('ip_blacklist.title')}}</span>
                 </a>
             </router-link>
             <router-link tag="li" to="/dns_blacklist" active-class="active" class="list-group-item">
                 <a>
-                    <span class="fa fa-gear"></span>
+                    <span class="fa fa-shield"></span>
                     <span class="list-group-item-value">{{$t('dns_blacklist.title')}}</span>
                 </a>
             </router-link>
