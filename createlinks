@@ -27,14 +27,16 @@ use File::Path;
 #--------------------------------------------------
 
 $event = "nethserver-blacklist-update";
-event_templates($event,
-    "/etc/cron.d/nethserver-blacklist"
-);
+event_templates($event, qw(
+    /etc/cron.d/nethserver-blacklist
+    /etc/dnsmasq.conf
+));
 
 event_actions($event, 'initialize-default-databases' => '00');
 
 event_services($event, qw(
     ftl restart
+    dnsmasq restart
 ));
 
 
@@ -46,6 +48,7 @@ $event = "nethserver-blacklist-save";
 event_templates($event, qw(
     /etc/cron.d/nethserver-blacklist
     /etc/pihole/dnsmasq.conf
+    /etc/dnsmasq.conf
 ));
 
 event_actions($event, qw(
@@ -55,6 +58,7 @@ event_actions($event, qw(
 
 event_services($event, qw(
     ftl restart
+    dnsmasq restart
 ));
 
 validator_actions($_, qw(

@@ -1,0 +1,14 @@
+#
+# 60doh
+#
+{
+    my $status = $ftl{'status'} || 'disabled';
+    my $zones = $ftl{'Roles'} || '';
+
+    if ($status eq 'enabled' && $zones ne '') {
+        $OUT .= "# Signal to Firefox that the local network is unsuitable for DNS-over-HTTPS\n";
+        $OUT .= "# This follows https://support.mozilla.org/en-US/kb/configuring-networks-disable-dns-over-https\n";
+        $OUT .= "# (sourced 7th September 2019)\n";
+        $OUT .= "server=/use-application-dns.net/\n";
+    }
+}
