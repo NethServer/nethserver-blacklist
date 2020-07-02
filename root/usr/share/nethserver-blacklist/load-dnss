@@ -122,6 +122,7 @@ count=$($SQLITE $GRAVITY_DB 'SELECT COUNT(DISTINCT domain) FROM vw_gravity;')
 $SQLITE "$GRAVITY_DB" "INSERT OR REPLACE INTO info (property, value) VALUES ('gravity_count', $count);"
 debug "Update total domains in gravity db. There are $count domains"
 
-# restart ftl and load new domains
-debug "Restart ftl"
-/usr/bin/systemctl restart ftl
+# reload lists
+debug "Reloading lists"
+PID=$(/bin/systemctl -p MainPID show ftl | cut -d '=' -f2)
+kill -SIGRTMIN $PID
