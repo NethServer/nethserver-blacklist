@@ -1,0 +1,14 @@
+#
+# 55DomainRedirection
+#
+
+{
+    foreach ( split(',',$dnsmasq{'DomainRedirection'} || '')) {
+        my ($domain, $direction) = split(':', $_);
+
+        if(!$domain) {
+            next;
+        }
+        $OUT .= "server=/$domain/$direction\n";
+    }
+}
