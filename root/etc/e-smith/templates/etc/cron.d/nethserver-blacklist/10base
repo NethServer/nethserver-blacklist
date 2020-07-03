@@ -10,7 +10,7 @@
 
     my $dns_status = $ftl{'status'} || 'disabled';
     if ($dns_status eq 'enabled') {
-        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download dnss'
+        $OUT .= '0 23 * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download dnss'
     } else {
         $OUT .= "# Blacklists (dns) are disabled"
     }
