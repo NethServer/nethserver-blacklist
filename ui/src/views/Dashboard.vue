@@ -149,7 +149,8 @@
         <div class="stats-container col-xs-12 col-sm-4 col-md-3">
           <span
             class="card-pf-utilization-card-details-count stats-count"
-          >{{ (dnsStats.general.ads_blocked_today || dnsStats.general.ads_blocked_today == 0) ? dnsStats.general.ads_blocked_today : '-' }}</span>
+            :title="(dnsStats.general.ads_blocked_today || dnsStats.general.ads_blocked_today == 0) ? dnsStats.general.ads_blocked_today : ''"
+          >{{ (dnsStats.general.ads_blocked_today || dnsStats.general.ads_blocked_today == 0) ? dnsStats.general.ads_blocked_today : '-' | humanFormat }}</span>
           <span class="card-pf-utilization-card-details-description stats-description">
             <span
               class="card-pf-utilization-card-details-line-2 stats-text"
@@ -160,7 +161,8 @@
         <div class="stats-container col-xs-12 col-sm-4 col-md-3">
           <span
             class="card-pf-utilization-card-details-count stats-count"
-          >{{ (dnsStats.general.dns_queries_today || dnsStats.general.dns_queries_today == 0) ? dnsStats.general.dns_queries_today : '-' }}</span>
+            :title="(dnsStats.general.dns_queries_today || dnsStats.general.dns_queries_today == 0) ? dnsStats.general.dns_queries_today : ''"
+          >{{ (dnsStats.general.dns_queries_today || dnsStats.general.dns_queries_today == 0) ? dnsStats.general.dns_queries_today : '-' | humanFormat}}</span>
           <span class="card-pf-utilization-card-details-description stats-description">
             <span
               class="card-pf-utilization-card-details-line-2 stats-text"
