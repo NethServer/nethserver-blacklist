@@ -6,4 +6,5 @@
         delaycompress
         notifempty
         nomail
+        missingok
 }
