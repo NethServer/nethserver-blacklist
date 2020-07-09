@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.1.1
+Version: 1.1.2
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Thu Jul 09 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.2-1
+- Blacklist: log rotate error on /var/log/pihole-FTL.log - Bug NethServer/dev#6226
+
 * Tue Jul 07 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.1-1
 - DNS Blacklists for threat shield   - NethServer/dev#6212
 
