@@ -111,7 +111,8 @@ def get_ip_logs(filter, lines):
                 dest_port = ""
                 dest_service = ""
 
-                if (re.search(r"^.+DPT=([0-9]+)", line)):
+                match = re.search(r"^.+DPT=([0-9]+)", line)
+                if match:
                     dest_port = match.group(1)
 
                     # retrieve service name
