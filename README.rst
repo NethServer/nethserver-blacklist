@@ -18,6 +18,14 @@ IP blacklist is managed by properties of ``blacklist`` key inside ``configuratio
   Example: given the category ``test``, a file named ``/usr/share/nethserver-blacklist/ipsets/test.netset`` or ``/usr/share/nethserver-blacklist/ipsets/test.ipset`` must exist
 * ``Url``: the GIT URL from where blacklists will be downloaded
 * ``Whitelist``: a comma-separated list of hosts excluded from the blacklists. The host can be an IP, a CIDR, an host object or a CIDR object
+* ``MaxElem`` : It does define the maximal number of elements which can be stored in the set, default 131072. You have to stop shorewall before to destroy the set, the shorewall service start will created it again with the new value.
+
+::
+
+ config setprop blacklist MaxElem 262144
+ systemctl stop shorewall
+ for S in $(ipset -L -name | grep '^bl-'); do : ; ipset destroy  $S; done
+ systemctl start shorewall
 
 Example: ::
 
@@ -177,4 +185,3 @@ Example content: ::
   dangerousdomain.net
   malwaresite.net
   ...
-
