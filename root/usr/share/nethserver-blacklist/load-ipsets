@@ -22,6 +22,7 @@
 
 BLDIR=/usr/share/nethserver-blacklist/ipsets
 STATUS=$(/sbin/e-smith/config getprop blacklist status)
+MAXELEM=$(/sbin/e-smith/config getprop blacklist MaxElem)
 LISTS=$(/sbin/e-smith/config getprop blacklist Categories | tr , ' ')
 RELOAD=0
 DEBUG=0
@@ -108,7 +109,7 @@ for l in $LISTS; do
     fi
     debug "Creating ipset $name"
     # Create ipset and load IPs
-    /sbin/ipset create -exist $name $type maxelem 131072
+    /sbin/ipset create -exist $name $type maxelem ${MAXELEM:-131072}
     if [ $? -gt 0 ]; then
         warning "Can't create $name ipset"
     fi
