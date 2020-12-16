@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.1.3
+Version: 1.1.4
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Wed Dec 16 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.4-1
+- Blacklist: increase the maxelem set of ipset - NethServer/dev#6359
+
 * Thu Jul 16 2020 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.3-1
 - Threat shield: Cannot load IP blacklist logs in Analysis page - Bug NethServer/dev#6229
 
