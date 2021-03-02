@@ -124,5 +124,8 @@ debug "Update total domains in gravity db. There are $count domains"
 
 # reload lists
 debug "Reloading lists"
-PID=$(/bin/systemctl -p MainPID show ftl | cut -d '=' -f2)
-kill -SIGRTMIN $PID
+/bin/systemctl is-active ftl -q
+if [ $? -eq 0 ]; then
+    PID=$(/bin/systemctl -p MainPID show ftl | cut -d '=' -f2)
+    kill -SIGRTMIN $PID
+fi
