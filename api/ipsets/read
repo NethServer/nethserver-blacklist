@@ -37,50 +37,51 @@ def get_config():
 
 
 def get_categories():
-    path = "/usr/share/nethserver-blacklist/ipsets"
+    paths = ["/usr/share/nethserver-blacklist/ipsets","/usr/share/nethserver-blacklist/geoips"]
     categories = []
 
-    if os.path.exists(path):
-        for file_name in os.listdir(path):
-            if file_name.endswith(".ipset") or file_name.endswith(".netset"):
-                full_path = path + "/" + file_name
-                category = {
-                    'confidence': 0  # // default value
-                }
+    for path in paths:
+        if os.path.exists(path):
+            for file_name in os.listdir(path):
+                if file_name.endswith(".ipset") or file_name.endswith(".netset"):
+                    full_path = path + "/" + file_name
+                    category = {
+                        'confidence': 0  # // default value
+                    }
 
-                with open(full_path) as f:
-                    lines = f.readlines()
+                    with open(full_path) as f:
+                        lines = f.readlines()
 
-                    for line in lines:
-                        # parse only the header
-                        if not re.match(r"^#", line):
-                            break
+                        for line in lines:
+                            # parse only the header
+                            if not re.match(r"^#", line):
+                                break
 
-                        # skip empty lines
-                        if re.match(r"^\s*$", line):
-                            continue
+                            # skip empty lines
+                            if re.match(r"^\s*$", line):
+                                continue
 
-                        maintainer = re.search(r"Maintainer\s+:\s+(\w+)", line)
-                        if maintainer:
-                            category['maintainer'] = maintainer.group(1)
-                            continue
+                            maintainer = re.search(r"Maintainer\s+:\s+(\w+)", line)
+                            if maintainer:
+                                category['maintainer'] = maintainer.group(1)
+                                continue
 
-                        category_type = re.search(r"Category\s+:\s+(\w+)", line)
-                        if category_type:
-                            category['type'] = category_type.group(1)
-                            continue
+                            category_type = re.search(r"Category\s+:\s+(\w+)", line)
+                            if category_type:
+                                category['type'] = category_type.group(1)
+                                continue
 
-                        confidence = re.search(r"Confidence\s+:\s+(\w+)", line)
-                        if confidence:
-                            category['confidence'] = int(confidence.group(1))
-                            continue
+                            confidence = re.search(r"Confidence\s+:\s+(\w+)", line)
+                            if confidence:
+                                category['confidence'] = int(confidence.group(1))
+                                continue
 
-                f.closed
-                category_id = re.search(r"(.+)\..+", file_name).group(1)
-                category['id'] = category_id
-                name = category_id.replace("_", " ").capitalize()
-                category['name'] = name
-                categories.append(category)
+                    f.closed
+                    category_id = re.search(r"(.+)\..+", file_name).group(1)
+                    category['id'] = category_id
+                    name = category_id.replace("_", " ").capitalize()
+                    category['name'] = name
+                    categories.append(category)
 
     return categories
 
