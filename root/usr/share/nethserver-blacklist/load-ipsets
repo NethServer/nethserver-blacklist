@@ -20,7 +20,7 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-BLDIR=/usr/share/nethserver-blacklist/ipsets
+BLDIR=(/usr/share/nethserver-blacklist/ipsets /usr/share/nethserver-blacklist/geoips)
 STATUS=$(/sbin/e-smith/config getprop blacklist status)
 MAXELEM=$(/sbin/e-smith/config getprop blacklist MaxElem)
 LISTS=$(/sbin/e-smith/config getprop blacklist Categories | tr , ' ')
@@ -91,30 +91,31 @@ if [ -f $BLDIR/whitelist.global ]; then
     cat $BLDIR/whitelist.global | sed '/^#/d; /^$/d' | sed "s/^/add bl-whitelist /" | /sbin/ipset restore
 fi
 
-for l in $LISTS; do
-    file=''
-    type=''
-    file_netset="$BLDIR/$l".netset
-    file_ipset="$BLDIR/$l".ipset
-    name=$(echo "bl-$l" | cut -c 1-31) # limit to 31 chars
-    if [ -f $file_netset ]; then
-        file=$file_netset
-        type="hash:net"
-    elif [ -f $file_ipset ]; then
-        file=$file_ipset
-        type="hash:ip"
-    else
-        warning "Skipping invalid blacklist '$l'"
-        continue
-    fi
-    debug "Creating ipset $name"
-    # Create ipset and load IPs
-    /sbin/ipset create -exist $name $type maxelem ${MAXELEM:-131072}
-    if [ $? -gt 0 ]; then
-        warning "Can't create $name ipset"
-    fi
-    cat $file | sed '/^#/d; /^$/d' | sed "s/^/add $name /" | /sbin/ipset restore
-    if [ $? -gt 0 ]; then
-        warning "Can't load $name ipset"
-    fi
+for dir in "${BLDIR[@]}"; do
+    for l in $LISTS; do
+        file=''
+        type=''
+        file_netset="$dir/$l".netset
+        file_ipset="$dir/$l".ipset
+        name=$(echo "bl-$l" | cut -c 1-31) # limit to 31 chars
+        if [ -f $file_netset ]; then
+            file=$file_netset
+            type="hash:net"
+        elif [ -f $file_ipset ]; then
+            file=$file_ipset
+            type="hash:ip"
+        else
+            continue
+        fi
+        debug "Creating ipset $name"
+        # Create ipset and load IPs
+        /sbin/ipset create -exist $name $type maxelem ${MAXELEM:-131072}
+        if [ $? -gt 0 ]; then
+            warning "Can't create $name ipset"
+        fi
+        cat $file | sed '/^#/d; /^$/d' | sed "s/^/add $name /" | /sbin/ipset restore
+        if [ $? -gt 0 ]; then
+            warning "Can't load $name ipset"
+        fi
+    done
 done
