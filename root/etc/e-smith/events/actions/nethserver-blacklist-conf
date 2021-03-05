@@ -27,15 +27,30 @@ event=$1    # name of the event (not used)
 type=$2     # blacklist type (ipsets or dnss)
 
 if [[ "$type" == "ipsets" ]]; then
-    conf="blacklist"
+    status=$(/sbin/e-smith/config getprop blacklist status)
+    ipsetUrl=$(/sbin/e-smith/config getprop blacklist Url)
+    geoipStatus=$(/sbin/e-smith/config getprop blacklist geoipStatus)
+
+    if [[ "$status" != "enabled" ]]; then
+        exit 0
+    fi
+
+    if [[ "$ipsetUrl" != "" ]]; then
+        /usr/share/nethserver-blacklist/download ipsets
+    fi
+    if [[ "$geoipStatus" == "enabled" ]]; then
+        /usr/share/nethserver-blacklist/download geoip
+    fi
+
+
 elif [[ "$type" == "dnss" ]]; then
-    conf="ftl"
+    status=$(/sbin/e-smith/config getprop ftl status)
+
+    if [[ "$status" == "enabled" ]]; then
+        exec /usr/share/nethserver-blacklist/download dnss
+    fi
+
 else
     echo "Invalid blacklist type: $type"
     exit 1
-fi
-
-status=$(/sbin/e-smith/config getprop $conf status)
-if [[ "$status" == "enabled" ]]; then
-    exec /usr/share/nethserver-blacklist/download $type
 fi

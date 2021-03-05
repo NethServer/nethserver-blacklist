@@ -1,6 +1,9 @@
 {
     my $ip_status = $blacklist{'status'} || 'disabled';
-    if ($ip_status eq 'enabled') {
+    my $geoipStatus = $blacklist{'geoipStatus'} || 'disabled';
+    my $ipsetUrl = $blacklist{'Url'} || '';
+
+    if (($ip_status eq 'enabled') && ($ipsetUrl ne '')) {
         $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download ipsets'
     } else {
         $OUT .= "# Blacklists (ip) are disabled"
@@ -13,5 +16,13 @@
         $OUT .= '0 23 * * * root sleep $(( ( RANDOM \% 900 ) )); /usr/share/nethserver-blacklist/download dnss'
     } else {
         $OUT .= "# Blacklists (dns) are disabled"
+    }
+
+    $OUT .= "\n";
+
+    if (($ip_status eq 'enabled') && ($geoipStatus eq 'enabled')) {
+        $OUT .= '* * 1 * * root sleep $(( ( RANDOM \% 7200 ) )); /usr/share/nethserver-blacklist/download geoip'
+    } else {
+        $OUT .= "# Blacklists (geoip) are disabled"
     }
 }
