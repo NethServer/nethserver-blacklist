@@ -49,6 +49,22 @@
             />
           </div>
         </div>
+        <!-- geoipStatus -->
+        <div class="form-group">
+          <label
+            class="col-sm-2 control-label"
+            for="blacklist-geoipStatus"
+          >{{$t('ip_blacklist.enable_geoip_blacklist')}}</label>
+          <div class="col-sm-5">
+            <input
+              type="checkbox"
+              v-model="config.geoipStatus"
+              id="blacklist-geoipStatus"
+              class="form-control"
+              :disabled="!config.status"
+            />
+          </div>
+        </div>
         <!-- download url -->
         <div :class="['form-group', {'has-error': error.url}]">
           <label class="col-sm-2 control-label" for="blacklist-url">
@@ -311,6 +327,7 @@ export default {
       },
       config: {
         status: false,
+        geoipStatus: false,
         url: "",
         whitelist: [],
         categories: [],
@@ -442,6 +459,11 @@ export default {
             } else {
               context.config.status = false;
             }
+            if (props.geoipStatus === "enabled") {
+              context.config.geoipStatus = true;
+            } else {
+              context.config.geoipStatus = false;
+            }
             context.config.url = props.Url;
             context.config.lastUrl = context.config.url;
             context.config.whitelist = context.buildWhitelist(props.Whitelist);
@@ -561,6 +583,7 @@ export default {
 
       var validateObj = {
         status: this.config.status ? "enabled" : "disabled",
+        geoipStatus: this.config.geoipStatus ? "enabled" : "disabled",
         Url: this.config.url,
         Whitelist: this.getWhitelistIds(),
         Categories: this.getSelectedCategoriesIds()

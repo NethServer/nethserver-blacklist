@@ -84,7 +84,8 @@
     },
     "ip_blacklist": {
         "title": "IP blacklist",
-        "enable_ip_blacklist": "Enable IP blacklist"
+        "enable_ip_blacklist": "Enable IP blacklist",
+        "enable_geoip_blacklist": "Enable geoip blacklist"
     },
     "dns_blacklist": {
         "title": "DNS blacklist",
