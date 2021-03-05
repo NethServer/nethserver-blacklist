@@ -191,7 +191,7 @@ def pihole_telnet_domain(domain):
                     continue
             else:
                 # IP address of client
-                match = re.search(r"^ (\S+) \(ID.+$", line)
+                match = re.search(r"^ (\S+) \(ID.+: (gravity|not blocked)$", line)
                 if match:
                     client = match.group(1)
                     domain_info['clients'].append(client)

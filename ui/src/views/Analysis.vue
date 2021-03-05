@@ -204,7 +204,6 @@
             v-model="lines"
             id="lines"
             min="1"
-            max="10000"
             class="form-control"
             :placeholder="$t('analysis.lines_placeholder')"
           />
@@ -450,7 +449,7 @@ export default {
       searchFilter: "",
       ipLogs: [],
       dnsLogs: [],
-      lines: 500,
+      lines: 1000,
       isLoaded: {
         search: true,
         logs: false,
