@@ -33,6 +33,10 @@ case $TYPE in
     dnss)
         PROP=ftl
         ;;
+
+    geoip)
+        exec /usr/share/nethserver-blacklist/geoip
+        ;;
 esac
 
 URL=$(/sbin/e-smith/config getprop $PROP Url)
