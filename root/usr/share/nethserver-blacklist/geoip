@@ -40,7 +40,8 @@ done
 
 # ensure ipset directory is created
 /usr/bin/mkdir -p /usr/share/nethserver-blacklist/geoips
+/usr/bin/rm -f /usr/share/nethserver-blacklist/geoips/*
 /usr/bin/mv *.netset /usr/share/nethserver-blacklist/geoips/
 /usr/bin/rm -rf $dir
-exec /usr/share/nethserver-blacklist/load-ipsets --reload
+/usr/share/nethserver-blacklist/load-ipsets --reload
 exit $?
