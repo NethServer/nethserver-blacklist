@@ -21,7 +21,7 @@
     $OUT .= "\n";
 
     if (($ip_status eq 'enabled') && ($GeoipStatus eq 'enabled')) {
-        $OUT .= '* * 1 * * root sleep $(( ( RANDOM \% 7200 ) )); /usr/share/nethserver-blacklist/download geoip'
+        $OUT .= '* 3 * * * root sleep $(( ( RANDOM \% 7200 ) )); /usr/share/nethserver-blacklist/download geoip'
     } else {
         $OUT .= "# Blacklists (geoip) are disabled"
     }
