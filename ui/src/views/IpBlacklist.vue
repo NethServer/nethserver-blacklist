@@ -49,17 +49,17 @@
             />
           </div>
         </div>
-        <!-- geoipStatus -->
+        <!-- GeoipStatus -->
         <div class="form-group">
           <label
             class="col-sm-2 control-label"
-            for="blacklist-geoipStatus"
+            for="blacklist-GeoipStatus"
           >{{$t('ip_blacklist.enable_geoip_blacklist')}}</label>
           <div class="col-sm-5">
             <input
               type="checkbox"
-              v-model="config.geoipStatus"
-              id="blacklist-geoipStatus"
+              v-model="config.GeoipStatus"
+              id="blacklist-GeoipStatus"
               class="form-control"
               :disabled="!config.status"
             />
@@ -327,7 +327,7 @@ export default {
       },
       config: {
         status: false,
-        geoipStatus: false,
+        GeoipStatus: false,
         url: "",
         whitelist: [],
         categories: [],
@@ -459,10 +459,10 @@ export default {
             } else {
               context.config.status = false;
             }
-            if (props.geoipStatus === "enabled") {
-              context.config.geoipStatus = true;
+            if (props.GeoipStatus === "enabled") {
+              context.config.GeoipStatus = true;
             } else {
-              context.config.geoipStatus = false;
+              context.config.GeoipStatus = false;
             }
             context.config.url = props.Url;
             context.config.lastUrl = context.config.url;
@@ -583,7 +583,7 @@ export default {
 
       var validateObj = {
         status: this.config.status ? "enabled" : "disabled",
-        geoipStatus: this.config.geoipStatus ? "enabled" : "disabled",
+        GeoipStatus: this.config.GeoipStatus ? "enabled" : "disabled",
         Url: this.config.url,
         Whitelist: this.getWhitelistIds(),
         Categories: this.getSelectedCategoriesIds()

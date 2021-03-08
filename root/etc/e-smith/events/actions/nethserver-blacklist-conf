@@ -29,7 +29,7 @@ type=$2     # blacklist type (ipsets or dnss)
 if [[ "$type" == "ipsets" ]]; then
     status=$(/sbin/e-smith/config getprop blacklist status)
     ipsetUrl=$(/sbin/e-smith/config getprop blacklist Url)
-    geoipStatus=$(/sbin/e-smith/config getprop blacklist geoipStatus)
+    GeoipStatus=$(/sbin/e-smith/config getprop blacklist GeoipStatus)
 
     if [[ "$status" != "enabled" ]]; then
         exit 0
@@ -38,7 +38,7 @@ if [[ "$type" == "ipsets" ]]; then
     if [[ "$ipsetUrl" != "" ]]; then
         /usr/share/nethserver-blacklist/download ipsets
     fi
-    if [[ "$geoipStatus" == "enabled" ]]; then
+    if [[ "$GeoipStatus" == "enabled" ]]; then
         /usr/share/nethserver-blacklist/download geoip
     fi
 

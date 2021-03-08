@@ -26,7 +26,7 @@
 data=$(cat /dev/stdin)
 
 status=$(echo $data | jq -r '.status')
-geoipStatus=$(echo $data | jq -r '.geoipStatus')
+GeoipStatus=$(echo $data | jq -r '.GeoipStatus')
 url=$(echo $data | jq -r '.Url')
 whitelist=$(echo $data | jq -r '.Whitelist | join(",")')
 categories=$(echo $data | jq -r '.Categories | join(",")')
@@ -34,7 +34,7 @@ categories=$(echo $data | jq -r '.Categories | join(",")')
 current_url=$(/sbin/e-smith/config getprop blacklist Url)
 
 if [ "$status" = "enabled" ]; then
-    /sbin/e-smith/config setprop blacklist status "$status" geoipStatus "$geoipStatus" Url "$url" Whitelist "$whitelist" Categories "$categories"
+    /sbin/e-smith/config setprop blacklist status "$status" GeoipStatus "$GeoipStatus" Url "$url" Whitelist "$whitelist" Categories "$categories"
 
     if [ $? -gt 0 ]; then
         invalid_error

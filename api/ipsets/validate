@@ -44,7 +44,7 @@ input_json = simplejson.loads(line)
 invalid_attributes = []
 
 status_p = 'status'
-geoipStatus_p = 'geoipStatus'
+GeoipStatus_p = 'GeoipStatus'
 url_p = 'Url'
 whitelist_p = 'Whitelist'
 categories_p = 'Categories'
@@ -67,14 +67,14 @@ else:
 
 # perform all other validations only if status == 'enabled'
 if status == 'enabled':
-    # geoipStatus
-    if (geoipStatus_p not in input_json) or (not input_json[geoipStatus_p]):
-        invalid_attributes.append(invalid_attribute(geoipStatus_p, "empty"))
+    # GeoipStatus
+    if (GeoipStatus_p not in input_json) or (not input_json[GeoipStatus_p]):
+        invalid_attributes.append(invalid_attribute(GeoipStatus_p, "empty"))
     else:
-        geoipStatus = input_json[geoipStatus_p]
+        GeoipStatus = input_json[GeoipStatus_p]
 
-        if geoipStatus not in ['enabled', 'disabled']:
-            invalid_attributes.append(invalid_attribute(geoipStatus_p, "invalid"))
+        if GeoipStatus not in ['enabled', 'disabled']:
+            invalid_attributes.append(invalid_attribute(GeoipStatus_p, "invalid"))
     # url
     if (url_p not in input_json):
         invalid_attributes.append(invalid_attribute(url_p, "empty"))
