@@ -40,8 +40,9 @@ if [[ "$type" == "ipsets" ]]; then
     fi
     if [[ "$GeoipStatus" == "enabled" ]]; then
         /usr/share/nethserver-blacklist/download geoip
+    else
+        /usr/bin/rm -f /usr/share/nethserver-blacklist/geoips/*
     fi
-
 
 elif [[ "$type" == "dnss" ]]; then
     status=$(/sbin/e-smith/config getprop ftl status)
