@@ -582,7 +582,7 @@ export default {
 }
 
 .pie-chart-blank-slate {
-  height: 220px; /* same height as pie-chart */
+  height: 250px; /* same height as pie-chart */
   margin-bottom: 0;
   padding: 30px;
 }
