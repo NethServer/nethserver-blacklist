@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.1.6
+Version: 1.1.7
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Thu Mar 11 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.7-1
+- Threat shield: Domain check tool always shows all clients - Bug NethServer/dev#6448
+
 * Wed Mar 03 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.6-1
 - Threat shield can't be enabled - Bug NethServer/dev#6444
 
