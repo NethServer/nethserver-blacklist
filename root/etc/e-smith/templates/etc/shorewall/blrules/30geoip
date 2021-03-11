@@ -1,0 +1,72 @@
+{
+    use esmith::NetworksDB;
+    use NethServer::Firewall;
+    my $status = $geoip{'status'} || 'disabled';
+    if ($status eq 'enabled') {
+        my $fw = new NethServer::Firewall();
+        my $ndb = esmith::NetworksDB->open_ro();
+
+        # Enable global whitelist
+        my $wl = "net:+geo-whitelist";
+        $OUT .= "WHITELIST\t$wl\tloc\n";
+        $OUT .= "WHITELIST\tloc\t$wl\n";
+
+        $OUT .= "WHITELIST\t$wl\t\$FW\n";
+        $OUT .= "WHITELIST\t\$FW\t$wl\n";
+
+        if ($ndb->blue) {
+            $OUT .= "WHITELIST\t$wl\tblue\n";
+            $OUT .= "WHITELIST\tblue\t$wl\n";
+        }
+        if ($ndb->orange) {
+            $OUT .= "WHITELIST\t$wl\torang\n";
+            $OUT .= "WHITELIST\torang\t$wl\n";
+        }
+
+        # Enable local whitelist
+        foreach (split(/,/, $geoip{'Whitelist'})) {
+            my $host = $fw->getAddress($_) || '';
+            next if ($host eq '');
+            $OUT .= "WHITELIST\t".$fw->getZone($host)."\tloc\n";
+            $OUT .= "WHITELIST\tloc\t".$fw->getZone($host)."\n";
+
+            # firewall
+            $OUT .= "WHITELIST\t".$fw->getZone($host)."\t\$FW\n";
+            $OUT .= "WHITELIST\t\$FW\t".$fw->getZone($host)."\n";
+
+            if ($ndb->blue) {
+                $OUT .= "WHITELIST\t".$fw->getZone($host)."\tblue\n";
+                $OUT .= "WHITELIST\tblue\t".$fw->getZone($host)."\n";
+            }
+            if ($ndb->orange) {
+                $OUT .= "WHITELIST\t".$fw->getZone($host)."\torang\n";
+                $OUT .= "WHITELIST\torang\t".$fw->getZone($host)."\n";
+            }
+        }
+
+
+        # Enable selected blacklist categories
+        my @lists = split(/,/, $geoip{'Categories'});
+        # remove extension part, add 'geo-' prefix
+        @lists = map { substr("geo-$_", 0, 31)  } @lists;
+
+        foreach my $name (@lists) {
+            # green interface
+            $OUT .= "BLACKLIST\tnet:+$name\tloc\n";
+            $OUT .= "BLACKLIST\tloc\tnet:+$name\n";
+
+            # firewall
+            $OUT .= "BLACKLIST\tnet:+$name\t\$FW\n";
+            $OUT .= "BLACKLIST\t\$FW\tnet:+$name\n";
+
+            if ($ndb->blue) {
+                $OUT .= "BLACKLIST\tnet:+$name\tblue\n";
+                $OUT .= "BLACKLIST\tblue\tnet:+$name\n";
+            }
+            if ($ndb->orange) {
+                $OUT .= "BLACKLIST\tnet:+$name\torang\n";
+                $OUT .= "BLACKLIST\torang\tnet:+$name\n";
+            }
+        }
+    }
+}

@@ -14,4 +14,13 @@
     } else {
         $OUT .= "# Blacklists (dns) are disabled"
     }
+
+    $OUT .= "\n";
+
+    my $geoip_status = $geoip{'status'} || 'disabled';
+    if ($geoip_status eq 'enabled') {
+        $OUT .= '0 3 * * * root sleep $(( ( RANDOM \% 7200 ) )); /usr/share/nethserver-blacklist/download geoips'
+    } else {
+        $OUT .= "# Blacklists (geoip) are disabled"
+    }
 }
