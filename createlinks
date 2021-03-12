@@ -29,6 +29,7 @@ use File::Path;
 $event = "nethserver-blacklist-update";
 event_templates($event, qw(
     /etc/cron.d/nethserver-blacklist
+    /etc/pihole/dnsmasq.conf
     /etc/dnsmasq.conf
 ));
 
