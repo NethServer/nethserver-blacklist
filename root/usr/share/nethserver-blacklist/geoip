@@ -19,9 +19,16 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-dir=`/usr/bin/mktemp -d`
+tmp_dir=`/usr/bin/mktemp -d`
+out_dir="/usr/share/nethserver-blacklist/geoips"
 URL=$(/sbin/e-smith/db configuration getprop geoip Url)
-/usr/bin/cd $dir
+
+# ensure ipset directory is created and empty
+/usr/bin/mkdir -p $out_dir
+/usr/bin/find $out_dir -type f -delete
+
+# download and extract
+pushd $tmp_dir
 /usr/bin/wget $URL >/dev/null 2>&1
 tar -xf all-zones.tar.gz
 for j in *.zone
@@ -33,15 +40,11 @@ do
 # Maintainer : NethServer
 # List source URL : $URL
 # ISO Country Code : ${j%.zone}
-#
-$(/usr/bin/cat ${j})" > ${j}
-    /usr/bin/mv -- "$j" "${j%.zone}.netset"
+#" >  $out_dir/${j%.zone}.netset
+/usr/bin/cat $j >> $out_dir/${j%.zone}.netset
 done
 
-# ensure ipset directory is created
-/usr/bin/mkdir -p /usr/share/nethserver-blacklist/geoips
-/usr/bin/rm -f /usr/share/nethserver-blacklist/geoips/*
-/usr/bin/mv *.netset /usr/share/nethserver-blacklist/geoips/
-/usr/bin/rm -rf $dir
+# cleanup
+popd
+/usr/bin/rm -rf $tmp_dir
 /usr/share/nethserver-blacklist/load-geoips --reload
-exit $?
