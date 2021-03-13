@@ -185,3 +185,61 @@ Example content: ::
   dangerousdomain.net
   malwaresite.net
   ...
+
+GEOIP blacklist
+===============
+
+Configuration
+-------------
+
+GEOIP blacklist is managed by properties of ``geoip`` key inside ``configuration`` database:
+
+* ``status``: can be ``enabled`` or ``disabled``, if ``enabled`` selected ``Categories`` will be blocked using ipsets
+* ``Categories``: a comma-separeted list of geoip blacklist categories, a valid category must have a corresponding file inside ``/usr/share/nethserver-blacklist/geoips`` without the extensions ``netset``.
+  Example: given the category ``fr.netset``, a file named ``/usr/share/nethserver-blacklist/geoips/fr.netset``must exist
+* ``Url``: the GIT URL from where blacklists will be downloaded (default ipdeny.com)
+* ``Whitelist``: a comma-separated list of hosts excluded from the blacklists. The host can be an IP, a CIDR, an host object or a CIDR object
+* ``MaxElem`` : It does define the maximal number of elements which can be stored in the set, default 131072. You have to stop shorewall before to destroy the set, the shorewall service start will created it again with the new value.
+
+::
+
+ config setprop geoip MaxElem 262144
+ systemctl stop shorewall
+ for S in $(ipset -L -name | grep '^geo-'); do : ; ipset destroy  $S; done
+ systemctl start shorewall
+
+Example: ::
+
+ geoip=configuration
+    Categories=fr,es
+    Url=https://www.ipdeny.com/ipblocks/data/countries/all-zones.tar.gz
+    Whitelist=
+    status=disabled
+
+
+blacklist
+---------
+
+Geoip blacklist implementation is based on ipset:
+
+* download geoip blacklist from the website ipdeny.com
+* block access from/to black listed IPs
+* support whitelisting
+* lists are updated each night, ipsets are reloaded on change
+* all blocked IPs are logged inside ``/var/log/firewall.log``
+
+
+Example
+-------
+
+The geoip list must be enabled manually: ::
+
+ config setprop geoip status enabled
+ signal-event nethserver-blacklist-save geoips
+
+Once downloaded you can enable the geo banning by the command line: ::
+
+ config setprop geoip status enabled Categories es,fr Whitelist '195.234.41.0/24,195.234.42.3'
+ signal-event nethserver-blacklist-save geoips
+
+The command above takes care to whitelist a CIDR network or a specific IP
