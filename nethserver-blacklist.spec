@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.1.7
+Version: 1.1.8
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Mon Mar 15 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.8-1
+- DNS Blacklists for threat shield does not start correctly after a disaster recovery - Bug NethServer/dev#6455
+
 * Thu Mar 11 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.7-1
 - Threat shield: Domain check tool always shows all clients - Bug NethServer/dev#6448
 
