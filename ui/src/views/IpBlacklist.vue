@@ -69,7 +69,9 @@
         </div>
         <!-- whitelist -->
         <div :class="['form-group', {'has-error': error.whitelist}]">
-          <label class="col-sm-2 control-label">{{$t('settings.whitelist')}}</label>
+          <label class="col-sm-2 control-label">{{$t('settings.whitelist')}}
+            <doc-info :placement="'top'" :chapter="'whitelist_blacklist'" :inline="true"></doc-info>
+          </label>
           <div class="col-sm-5">
             <div id="pf-list-standard" class="list-group list-view-pf list-view-pf-view whitelist">
               <div v-for="item in config.whitelist" class="list-group-item">
