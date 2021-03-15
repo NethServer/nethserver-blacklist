@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Copyright (C) 2021 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+tmp_dir=`/usr/bin/mktemp -d`
+out_dir="/usr/share/nethserver-blacklist/geoips"
+URL=$(/sbin/e-smith/db configuration getprop geoip Url)
+
+# ensure ipset directory is created and empty
+/usr/bin/mkdir -p $out_dir
+/usr/bin/find $out_dir -type f -delete
+
+# download and extract
+pushd $tmp_dir
+/usr/bin/wget $URL >/dev/null 2>&1
+tar -xf all-zones.tar.gz
+for j in *.zone
+do
+    echo "#
+# ipv4 hash:net
+# Category : geoip_blocking
+# Source File Date : $(/usr/bin/date)
+# Maintainer : NethServer
+# List source URL : $URL
+# ISO Country Code : ${j%.zone}
+#" >  $out_dir/${j%.zone}.netset
+/usr/bin/cat $j >> $out_dir/${j%.zone}.netset
+done
+
+# cleanup
+popd
+/usr/bin/rm -rf $tmp_dir
+/usr/share/nethserver-blacklist/load-geoips --reload

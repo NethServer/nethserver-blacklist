@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/perl
 
 #
 # Copyright (C) 2020 Nethesis S.r.l.
@@ -20,24 +20,24 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-#
-# Download the blacklists for the first time
-#
-event=$1    # name of the event (not used)
-type=$2     # blacklist type (ipsets or dnss)
 
-if [[ "$type" == "ipsets" ]]; then
-    conf="blacklist"
-elif [[ "$type" == "dnss" ]]; then
-    conf="ftl"
-elif [[ "$type" == "geoips" ]]; then
-    conf="geoip"
-else
-    echo "Invalid blacklist type: $type"
-    exit 1
-fi
+use strict;
+use esmith::ConfigDB;
 
-status=$(/sbin/e-smith/config getprop $conf status)
-if [[ "$status" == "enabled" ]]; then
-    exec /usr/share/nethserver-blacklist/download $type
-fi
+my $dbName = shift;
+my $key = shift;
+my $db = esmith::ConfigDB->open_ro();
+my $whitelist = $db->get_prop("geoip", "Whitelist");
+my @list = split(/,/, $whitelist);
+
+foreach (@list) {
+    if ($_ =~ /;/) {
+        my ($type, $name) = split(/;/, $_);
+        if ($name eq $key) {
+            print "$dbName:$key is used in GEOIP blacklist\n";
+            exit(1);
+        }
+    }
+}
+
+exit(0);
