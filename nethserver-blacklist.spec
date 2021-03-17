@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.1.8
+Version: 1.2.0
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Wed Mar 17 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.0-1
+- Blacklist: add geoIP support - NethServer/dev#6458
+
 * Mon Mar 15 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.1.8-1
 - DNS Blacklists for threat shield does not start correctly after a disaster recovery - Bug NethServer/dev#6455
 
