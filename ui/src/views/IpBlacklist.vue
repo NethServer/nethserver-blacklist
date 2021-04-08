@@ -256,11 +256,14 @@
                   :class="['checkbox-label', {'gray': (!props.row.enabled || !config.status)}]"
                 >
                   <span
-                    :class="['category-status-icon', 'pficon', (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
+                    :class="['category-status-icon', 'pficon', (props.row.missing && config.status) ? ['pficon-warning-triangle-o', 'orange'] : (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
                   ></span>
-                  <span
+                  <span v-if="(!props.row.missing && config.status)"
                     :class="{'green': (props.row.enabled && config.status)}"
                   >{{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}</span>
+                  <span v-if="(props.row.missing && config.status)"
+                    class="orange"
+                  >{{ $t('missing') }}</span>
                 </label>
               </span>
               <span v-else-if="props.column.field == 'confidence'">
@@ -270,7 +273,7 @@
                 >
                   <span
                     :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
-                    {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)}]"
+                    {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)},{'orange': (props.row.missing && config.status)}]"
                   >
                     <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
                     <span v-else>{{ $t('unknown') }}</span>
@@ -512,6 +515,8 @@ export default {
 
               if (categoryFound) {
                 categoryFound.enabled = true;
+              } else if (enabledCategory !== '') {
+                categories.push({"id":enabledCategory,"enabled":true,"missing":true,"selected":false});
               }
             });
             context.allCategories = categories;
