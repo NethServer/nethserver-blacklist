@@ -46,11 +46,17 @@
 
 
         # Enable selected blacklist categories
+
+        # retrieve the list of valid sets and compare it later
+        my %params = map { $_ => 1 } split(/\n/, `/usr/sbin/ipset list -name`);
         my @lists = split(/,/, $geoip{'Categories'});
         # remove extension part, add 'geo-' prefix
         @lists = map { substr("geo-$_", 0, 31)  } @lists;
 
         foreach my $name (@lists) {
+            # if the set does not exist use next item
+            next unless (exists ($params{$name}));
+
             # green interface
             $OUT .= "BLACKLIST\tnet:+$name\tloc\n";
             $OUT .= "BLACKLIST\tloc\tnet:+$name\n";
