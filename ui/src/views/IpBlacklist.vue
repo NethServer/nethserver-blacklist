@@ -258,12 +258,12 @@
                   <span
                     :class="['category-status-icon', 'pficon', (props.row.missing && config.status) ? ['pficon-warning-triangle-o', 'orange'] : (props.row.enabled && config.status) ? ['pficon-ok', 'green'] : 'pficon-off']"
                   ></span>
-                  <span v-if="(!props.row.missing && config.status)"
-                    :class="{'green': (props.row.enabled && config.status)}"
-                  >{{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}</span>
-                  <span v-if="(props.row.missing && config.status)"
-                    class="orange"
-                  >{{ $t('missing') }}</span>
+                  <span v-if="!props.row.missing" :class="{'green': (props.row.enabled && config.status)}" 
+                    >{{ (props.row.enabled && config.status) ? $t('enabled') : $t('disabled') }}
+                  </span>
+                  <span v-else :class="[(props.row.missing && config.status) ? 'orange':'gray']"
+                    >{{ $t('missing') }}
+                  </span>
                 </label>
               </span>
               <span v-else-if="props.column.field == 'confidence'">
@@ -273,7 +273,7 @@
                 >
                   <span
                     :class="['confidence', {'green': (props.row.enabled && config.status && props.row.confidence > 6)},
-                    {'orange': (props.row.enabled && config.status && props.row.confidence <= 6)},{'orange': (props.row.missing && config.status)}]"
+                    {'orange': config.status && (props.row.enabled && props.row.confidence <= 6 || props.row.missing)}]"
                   >
                     <span v-if="props.row.confidence > 0">{{props.row.confidence}}/10</span>
                     <span v-else>{{ $t('unknown') }}</span>
