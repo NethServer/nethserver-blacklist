@@ -70,3 +70,12 @@ validator_actions($_, qw(
     fwobject-host-delete
     fwobject-cidr-delete
 ));
+
+
+#---------------------------------------------------
+# After each host modification we need to restart ftl
+#---------------------------------------------------
+
+foreach (qw(host-create host-delete host-modify)) {
+    event_services($_, 'ftl' => 'restart');
+}
