@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.2.1
+Version: 1.2.2
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Fri May 07 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.2-1
+- FTL-pihole: the cache store wrong DNS - Bug NethServer/dev#6499
+
 * Wed Apr 14 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.1-1
 - Blacklist: Shorewall stops compiling in case of missing categories - Bug NethServer/dev#6481
 
