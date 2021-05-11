@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# Copyright (C) 2021 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+# If the blacklist is enabled during the configuration restoration : 
+# Delete the folders to store the blacklist before to download (URL could be different)
+# Download the blacklists
+# Reload the ipsets
+#
+
+BlacklistStatus=$(/sbin/e-smith/config getprop blacklist status)
+FtlStatus=$(/sbin/e-smith/config getprop ftl status)
+GeoipStatus=$(/sbin/e-smith/config getprop geoip status)
+
+if [[ "$BlacklistStatus" == "enabled" ]]; then
+    /usr/bin/rm -rf /usr/share/nethserver-blacklist/ipsets 
+    /usr/share/nethserver-blacklist/download ipsets
+    /usr/share/nethserver-blacklist/load-ipsets --reload
+fi
+
+if [[ "$FtlStatus" == "enabled" ]]; then
+    /usr/bin/rm -rf  /usr/share/nethserver-blacklist/dnss
+    /usr/share/nethserver-blacklist/download dnss
+    /usr/share/nethserver-blacklist/load-dnss --reload
+fi
+
+if [[ "$GeoipStatus" == "enabled" ]]; then
+    /usr/share/nethserver-blacklist/geoip
+fi
