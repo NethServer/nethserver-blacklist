@@ -79,3 +79,10 @@ validator_actions($_, qw(
 foreach (qw(host-create host-delete host-modify)) {
     event_services($_, 'ftl' => 'restart');
 }
+
+#------------------------------------------------------
+# Download ipset and DNS list with post-restore-config
+#------------------------------------------------------
+
+event_actions('post-restore-config', 
+        'nethserver-blacklist-restore' => '50');
