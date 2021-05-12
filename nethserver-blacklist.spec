@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.2.2
+Version: 1.2.3
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Wed May 12 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.3-1
+- Blacklist: lists are not downloaded after a configuration restoration - Bug NethServer/dev#6508
+
 * Fri May 07 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.2-1
 - FTL-pihole: the cache store wrong DNS - Bug NethServer/dev#6499
 
