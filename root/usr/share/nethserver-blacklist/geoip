@@ -29,7 +29,7 @@ URL=$(/sbin/e-smith/db configuration getprop geoip Url)
 
 # download and extract
 pushd $tmp_dir
-/usr/bin/wget $URL >/dev/null 2>&1
+/usr/bin/wget $URL --no-check-certificate >/dev/null 2>&1
 tar -xf all-zones.tar.gz
 for j in *.zone
 do
