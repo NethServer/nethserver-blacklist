@@ -1,2 +1,3 @@
 system("/usr/share/nethserver-blacklist/load-ipsets");
+system("/usr/share/nethserver-blacklist/load-geoips");
 1;
