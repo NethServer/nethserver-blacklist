@@ -75,8 +75,8 @@ First install a clean NethServer, then follow the below steps.
 
 Install required packages: ::
 
-  yum install -y https://github.com/firehol/packages/releases/download/2020-02-18-0552/firehol-3.1.6-12.el7.noarch.rpm https://github.com/firehol/packages/releases/download/2020-02-18-0552/iprange-1.0.4-2.el7.x86_64.rpm unzip https://centos7.iuscommunity.org/ius-release.rpm
-  yum install -y git216-core --enablerepo=ius
+yum install https://repo.ius.io/ius-release-el7.rpm
+yum install -y git224-core --enablerepo=ius
 
 Create the git repository and serve it using Apache:
 
@@ -106,7 +106,7 @@ Configure and enable ``update-ipsets``: ::
   GIT_CMD=/usr/bin/git
   EOF
 
-  mkdir /var/www/html/git/ipsets
+  mkdir -p /var/www/html/git/ipsets
   git -C /var/www/html/git/ipsets init
   /usr/sbin/update-ipsets enable dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw firehol_level1
   /usr/sbin/update-ipsets run dshield feodo fullbogons spamhaus_drop spamhaus_edrop sslbl zeus_badips ransomware_rw firehol_level1
