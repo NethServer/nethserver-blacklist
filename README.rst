@@ -118,7 +118,7 @@ Configure and enable ``update-ipsets``: ::
 Set up a cron to regularly update the ipsets: ::
 
   cat << EOF >> /etc/cron.d/update-ipsets
-  */19 * * * * root update-ipsets
+  */19 * * * * root /usr/sbin/update-ipsets
   EOF
 
 
