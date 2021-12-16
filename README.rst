@@ -75,11 +75,11 @@ First install a clean NethServer, then follow the below steps.
 
 Install required packages: ::
 
-yum install https://github.com/firehol/packages/releases/download/2021-01-01-1948/firehol-3.1.7-11.el7.noarch.rpm https://github.com/firehol/packages/releases/download/2021-01-01-1948/iprange-1.0.4-2.el7.x86_64.rpm
+  yum install https://github.com/firehol/packages/releases/download/2021-01-01-1948/firehol-3.1.7-11.el7.noarch.rpm https://github.com/firehol/packages/releases/download/2021-01-01-1948/iprange-1.0.4-2.el7.x86_64.rpm
 
-yum install https://repo.ius.io/ius-release-el7.rpm
+  yum install https://repo.ius.io/ius-release-el7.rpm
 
-yum install -y git224-core --enablerepo=ius
+  yum install -y git224-core --enablerepo=ius
 
 Create the git repository and serve it using Apache:
 
