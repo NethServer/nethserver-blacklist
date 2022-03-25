@@ -28,7 +28,7 @@ URL=$(/sbin/e-smith/db configuration getprop geoip Url)
 /usr/bin/find $out_dir -type f -delete
 
 # download and extract
-pushd $tmp_dir
+cd $tmp_dir
 /usr/bin/wget $URL --no-check-certificate >/dev/null 2>&1
 tar -xf all-zones.tar.gz
 for j in *.zone
@@ -45,6 +45,6 @@ do
 done
 
 # cleanup
-popd
+cd $OLDPWD
 /usr/bin/rm -rf $tmp_dir
 /usr/share/nethserver-blacklist/load-geoips --reload
