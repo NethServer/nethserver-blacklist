@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.2.5
+Version: 1.2.6
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Mon Mar 28 2022 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.6-1
+- Geoip update generate useless mail from crond - Bug NethServer/dev#6651
+
 * Mon Nov 22 2021 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.5-1
 - blacklist: ipsets for geoip are not created after the boot start - Bug NethServer/dev#6601
 
