@@ -1,7 +1,7 @@
 {
     my $ip_status = $blacklist{'status'} || 'disabled';
     if ($ip_status eq 'enabled') {
-        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 60 ) )); /usr/share/nethserver-blacklist/download ipsets'
+        $OUT .= '*/20 * * * * root sleep $(( ( RANDOM \% 300 ) )); /usr/share/nethserver-blacklist/download ipsets'
     } else {
         $OUT .= "# Blacklists (ip) are disabled"
     }
