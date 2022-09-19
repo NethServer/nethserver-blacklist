@@ -81,8 +81,6 @@ if [ -z "$URL" ]; then
     exit_error "Blacklist URL is not set"
 fi
 
-# Prepare work directory
-mkdir -p $DEST_DIR
 
 # Inject authentication into URL
 proto="$(echo $URL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
@@ -98,34 +96,26 @@ if [ $DEBUG -eq  0 ]; then
     quiet=" --quiet "
 fi
 
-# Create repository clone
-if [ ! -d "$DEST_DIR/.git" ]; then
-    debug "Cloning repository"
-    git clone --depth 1 $quiet $proto$auth$url $DEST_DIR
-    if [ $? -gt 0 ]; then
-        exit_error "Can't download blacklist repository"
-    fi
-
-    # do not leak secret
-    chmod 600 "$DEST_DIR/.git/config"
+# Reload only after first fetch
+if [[ -d "$DEST_DIR" ]]; then
+    must_reload=1
 else
-    # Pull changes
-    opts="--git-dir=$DEST_DIR/.git --work-tree=$DEST_DIR"
-    debug "Pulling changes"
+    must_reload=0
+fi
 
-    git $opts fetch --all &>/dev/null
-    if [ $? -gt 0 ]; then
-        exit_error "Can't update blacklist repository: fetch failed"
-    fi
-    git $opts reset --hard origin/master &>/dev/null
-    if [ $? -eq 0 ]; then
-        debug_flag=""
-        if [ $DEBUG -eq 1 ]; then
-            debug_flag="-d"
-        fi
-        debug "Repository have been updated: reloading $TYPE"
-        exec /usr/share/nethserver-blacklist/load-$TYPE --reload $debug_flag
-    else
-        debug "Can't update blacklist repository: hard reset failed"
-    fi
+# Prepare work directory
+rm -rf $DEST_DIR
+mkdir -p $DEST_DIR
+
+debug "Cloning repository"
+git clone --depth 1 $quiet $proto$auth$url $DEST_DIR
+if [ $? -gt 0 ]; then
+    exit_error "Can't download $TYPE repository"
+fi
+# do not leak secret
+chmod 600 "$DEST_DIR/.git/config"
+
+if [[ "$must_reload" -eq 1 ]]; then
+    debug "Repository have been updated: reloading $TYPE"
+    exec /usr/share/nethserver-blacklist/load-$TYPE --reload $debug_flag
 fi
