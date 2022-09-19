@@ -99,21 +99,28 @@ fi
 # Reload only after first fetch
 if [[ -d "$DEST_DIR" ]]; then
     must_reload=1
+    # Backup existing dir
+    mv "$DEST_DIR" "$DEST_DIR".bak
 else
     must_reload=0
 fi
 
 # Prepare work directory
-rm -rf $DEST_DIR
 mkdir -p $DEST_DIR
 
 debug "Cloning repository"
 git clone --depth 1 $quiet $proto$auth$url $DEST_DIR
 if [ $? -gt 0 ]; then
+    # Restore backup
+    rm -rf "$DEST_DIR"
+    mv "$DEST_DIR".bak "$DEST_DIR"
     exit_error "Can't download $TYPE repository"
 fi
-# do not leak secret
+# Do not leak secret
 chmod 600 "$DEST_DIR/.git/config"
+
+# Cleanup backup
+rm -rf "$DEST_DIR".bak
 
 if [[ "$must_reload" -eq 1 ]]; then
     debug "Repository have been updated: reloading $TYPE"
