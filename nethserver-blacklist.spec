@@ -1,6 +1,6 @@
 Summary: NethServer blacklist
 Name: nethserver-blacklist
-Version: 1.2.8
+Version: 1.3.0
 Release: 1%{?dist}
 License: GPL
 Source0: %{name}-%{version}.tar.gz
@@ -54,6 +54,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/libexec/nethserver/api/%{name}/
 
 %changelog
+* Tue Sep 20 2022 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.3.0-1
+- Blacklist download failed - Bug NethServer/dev#6699
+
 * Wed Sep 07 2022 Giacomo Sanchietti <giacomo.sanchietti@nethesis.it> - 1.2.8-1
 - Expand sleep before download - nethserver-blacklists#51
 
